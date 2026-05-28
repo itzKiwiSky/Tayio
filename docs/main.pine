@@ -1,0 +1,9 @@
+use System.IO
+
+global a = 1
+
+func main() do
+    write("Hello")
+end
+
+main()

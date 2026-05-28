@@ -1,0 +1,4 @@
+--class-path source
+--class-path test.specs
+--main test.specs.Main
+--interp
