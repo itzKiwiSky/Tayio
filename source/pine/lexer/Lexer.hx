@@ -133,17 +133,11 @@ class Lexer
                 tokens.push(result);
             }
             else if (currentChar == "=")
-            {
-                // if cases //
-                var posStart = position.copy();
-                var result:Null<Token> = createEqualCase();
-                
-                // if (result == null)
-                //    return Err(new LangError(posStart, position.copy(), ExpectedChar, "Expected '=' after '='"));
-                
-                tokens.push(result);
-                position.advance();
-            }
+                tokens.push(createEqualCase());
+            else if (currentChar == ">")
+                tokens.push(createGreaterThanCase());
+            else if (currentChar == "<")
+                tokens.push(createLowerThanCase());
             else
             {
                 return Err(new LangError(position.copy(), position.copy(), IllegalChar, 'caractere inválido: "$currentChar"'));
@@ -184,24 +178,49 @@ class Lexer
         return null;
     }
     
-    static function createEqualCase():Null<Token>
+    static function createEqualCase():Token
     {
-        var posStart = position.copy(); // ← salva antes de avançar
         position.advance();
         currentChar = position.currentChar;
         
         if (currentChar == "=")
         {
+            position.advance();
             currentChar = position.currentChar;
             return new Token("TT_EQ_EQUAL");
         }
-        else
+        
+        return new Token("TT_ASSIGN");
+    }
+    
+    static function createGreaterThanCase():Token
+    {
+        position.advance();
+        currentChar = position.currentChar;
+        
+        if (currentChar == "=")
         {
+            position.advance();
             currentChar = position.currentChar;
-            return new Token("TT_ASSIGN");
+            return new Token("TT_GT_OR_EQ");
         }
         
-        return null;
+        return new Token("TT_GT");
+    }
+    
+    static function createLowerThanCase():Token
+    {
+        position.advance();
+        currentChar = position.currentChar;
+        
+        if (currentChar == "=")
+        {
+            position.advance();
+            currentChar = position.currentChar;
+            return new Token("TT_LW_OR_EQ");
+        }
+        
+        return new Token("TT_LW");
     }
     
     static function raiseError(error:String, message:String)
