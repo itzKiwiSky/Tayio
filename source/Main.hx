@@ -5,7 +5,14 @@ class Main
 {
     static function main()
     {
-        var t = Lexer.lex("!=");
-        trace("\n" + Json.stringify(t, "    "));
+        switch (Lexer.lex("="))
+        {
+            case Ok(tokens):
+                trace("tokens gerados com sucesso!");
+                trace("\n" + Json.stringify(tokens, "    "));
+                
+            case Err(error):
+                Sys.println(error.asString());
+        }
     }
 }

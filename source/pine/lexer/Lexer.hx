@@ -1,8 +1,15 @@
 package pine.lexer;
 
+import pine.lexer.Error.LangError;
 import haxe.Exception;
 
 using StringTools;
+
+enum LexResult
+{
+    Ok(tokens:Array<Token>);
+    Err(error:LangError);
+}
 
 class Lexer
 {
@@ -42,23 +49,26 @@ class Lexer
     public static function lex(src:String)
     {
         source = src;
-        position = new Position("", source);
+        position = new Position("<stdin>", source);
         
         position.advance();
         
         while (position.index < source.length && !errorRaised)
         {
+            currentChar = position.currentChar;
             if (~/[ \t]/.match(currentChar))
                 position.advance();
             else if (~/[;\n]/.match(currentChar))
             {
                 tokens.push(new Token("TT_NEWLINE"));
                 position.advance();
+                currentChar = position.currentChar;
             }
             else if (currentChar == "+")
             {
                 tokens.push(new Token("TT_ADD"));
                 position.advance();
+                currentChar = position.currentChar;
             }
             else if (currentChar == "-")
             {
@@ -114,58 +124,81 @@ class Lexer
                 tokens.push(createIdentifier());
             else if (currentChar == "!")
             {
+                var posStart = position.copy(); // ← antes de entrar na função
                 var result:Null<Token> = createNotEqual();
                 
                 if (result == null)
-                {
-                    raiseError('SyntaxError:', 'Expected "=" at col: $position\n');
-                    return [];
-                }
+                    return Err(new LangError(posStart, position.copy(), ExpectedChar, "Expected '=' after '!'"));
+                    
+                tokens.push(result);
+            }
+            else if (currentChar == "=")
+            {
+                // if cases //
+                var posStart = position.copy();
+                var result:Null<Token> = createEqualCase();
                 
-                tokens.push(createNotEqual());
+                // if (result == null)
+                //    return Err(new LangError(posStart, position.copy(), ExpectedChar, "Expected '=' after '='"));
+                
+                tokens.push(result);
+                position.advance();
             }
             else
             {
-                var start:Int = position.index;
-                var char:String = currentChar;
-                position.advance();
-                // new Exception('SyntaxError: Invalid char $char at $position');
-                raiseError('SyntaxError', 'Invalid char $char at col: $position\n');
-                return [];
+                return Err(new LangError(position.copy(), position.copy(), IllegalChar, 'caractere inválido: "$currentChar"'));
             }
         }
         
         tokens.push(new Token("TT_EOF"));
-        return tokens;
+        return Ok(tokens);
     }
     
     static function createIdentifier():Token
     {
-        var result:String = "";
-        var tkType:String = "";
-        
-        while (currentChar != null && ~/[a-zA-Z_]/.match(currentChar))
+        var result = "";
+        while (position.currentChar != "" && ~/[a-zA-Z0-9_]/.match(position.currentChar))
         {
-            result += currentChar;
+            result += position.currentChar;
             position.advance();
+            currentChar = position.currentChar;
         }
         
-        if (keywords.contains(result))
-            tkType = "TT_KEYWORD";
-        else
-            tkType = "TT_IDENTIFIER";
-            
+        var tkType = keywords.contains(result) ? "TT_KEYWORD" : "TT_IDENTIFIER";
         return new Token(tkType, result);
     }
     
     static function createNotEqual():Null<Token>
     {
-        var start:Int = position.index;
+        var posStart:Position = position.copy(); // ← salva antes de avançar
         position.advance();
+        currentChar = position.currentChar;
+        
         if (currentChar == "=")
         {
             position.advance();
+            currentChar = position.currentChar;
             return new Token("TT_NOT_EQ");
+        }
+        
+        return null;
+    }
+    
+    static function createEqualCase():Null<Token>
+    {
+        var posStart = position.copy(); // ← salva antes de avançar
+        position.advance();
+        currentChar = position.currentChar;
+        
+        if (currentChar == "=")
+        {
+            currentChar = position.currentChar;
+            return new Token("TT_EQ_EQUAL");
+        }
+        else
+        {
+            currentChar = position.currentChar;
+            return new Token("TT_ASSIGN");
         }
         
         return null;

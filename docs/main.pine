@@ -1,9 +1,9 @@
-use System.IO
+use pine.stdout
 
 global a = 1
 
 func main() do
-    write("Hello")
+    print("Hello\n")
 end
 
 main()

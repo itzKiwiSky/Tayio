@@ -1,25 +1,37 @@
 package pine.lexer;
 
-class Error
+enum ErrorType
 {
-    var start:Int;
-    var end:Int;
-    var errName:String;
-    var details:String;
+    IllegalChar;
+    ExpectedChar;
+    InvalidSyntax;
+    RuntimeError;
+}
+
+class LangError
+{
+    public var posStart:Position;
+    public var posEnd:Position;
+    public var type:ErrorType;
+    public var details:String;
     
-    public function new(startPos:Int, endPos:Int, errorName:String, det:String)
+    public function new(posStart:Position, posEnd:Position, type:ErrorType, details:String)
     {
-        start = startPos;
-        end = endPos;
-        errName = errorName;
-        details = det;
+        this.posStart = posStart;
+        this.posEnd = posEnd;
+        this.type = type;
+        this.details = details;
     }
     
-    public function toString()
+    public function asString():String
     {
-        var text:String = "";
-        text += '$errName : $details\n';
-        text += 'line: $start';
-        return text;
+        var name = switch (type)
+        {
+            case IllegalChar: "Illegal Character";
+            case ExpectedChar: "Expected Character";
+            case InvalidSyntax: "Invalid Syntax";
+            case RuntimeError: "Runtime Error";
+        }
+        return '$name: $details\nFile ${posStart.fn}, line ${posStart.line + 1}';
     }
 }
