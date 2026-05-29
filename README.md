@@ -11,7 +11,6 @@ how interpreters / compilers work under the hood.
 ```
 use pine.std
 
-
 # Create a main function and say hello to the world
 func main() do
     out.println("Hello World")
@@ -23,7 +22,6 @@ end
 If you don't want to inject all the functions inside the global namespace, no problem, you can inject inside the function scope, so you can use inside a sandboxed area
 
 ```
-
 # Is the same as the first example, but now you can only use "print" or "println" inside the main function
 
 func main() uses pine.std[out, in] do
