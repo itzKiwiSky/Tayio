@@ -1,5 +1,7 @@
 package pine;
 
+import haxe.Exception;
+
 using StringTools;
 
 class Lexer
@@ -108,13 +110,20 @@ class Lexer
             }
             else if (letterTest.match(currentChar))
                 tokens.push(createIdentifier());
+            else if (currentChar == "!")
+            {
+                var result:Null<Token> = createNotEqual();
+                
+                if (result == null)
+                    tokens.push(createNotEqual());
+            }
             else
             {
                 var start:Int = position;
                 var char:String = currentChar;
                 peek();
-                trace("SyntaxError");
-                trace("Invalid char " + char + " at" + position);
+                // new Exception('SyntaxError: Invalid char $char at $position');
+                Sys.print('SyntaxError: Invalid char $char at col: $position\n');
                 return [];
             }
         }
@@ -140,21 +149,33 @@ class Lexer
     
     static function createIdentifier():Token
     {
-        var str:String = "";
-        var start:Int = position;
+        var result:String = "";
         var tkType:String = "";
         
         while (currentChar != null && ~/[a-zA-Z_]/.match(currentChar))
         {
-            str += currentChar;
+            result += currentChar;
             peek();
         }
         
-        if (keywords.contains(str))
+        if (keywords.contains(result))
             tkType = "TT_KEYWORD";
         else
             tkType = "TT_IDENTIFIER";
             
-        return new Token(tkType, str);
+        return new Token(tkType, result);
+    }
+    
+    static function createNotEqual():Null<Token>
+    {
+        var start:Int = position;
+        peek();
+        if (currentChar == "=")
+        {
+            peek();
+            return new Token("TT_NOT_EQ");
+        }
+        
+        return null;
     }
 }

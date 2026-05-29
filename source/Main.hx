@@ -4,7 +4,7 @@ class Main
 {
     static function main()
     {
-        var t = Lexer.lex("data");
+        var t = Lexer.lex("?");
         trace(t);
     }
 }
