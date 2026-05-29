@@ -38,10 +38,10 @@ class Lexer
         "func",
         "do",
         "end",
-        "use",
         "not",
         "and",
         "or",
+        "use",
         "uses",
         "extends",
         "export",
@@ -197,7 +197,7 @@ class Lexer
     
     static function createNotEqual():Null<Token>
     {
-        var posStart:Position = position.copy(); // ← salva antes de avançar
+        var posStart:Position = position.copy();
         position.advance();
         currentChar = position.currentChar;
         
