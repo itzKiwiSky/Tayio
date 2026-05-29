@@ -9,7 +9,10 @@ class Main
         {
             case Ok(tokens):
                 trace("tokens gerados com sucesso!");
-                trace("\n" + Json.stringify(tokens, "    "));
+                Sys.print("[\n");
+                for (tk in tokens)
+                    Sys.print("    " + tk + "\n");
+                Sys.print("[\n");
                 
             case Err(error):
                 Sys.println(error.asString());
