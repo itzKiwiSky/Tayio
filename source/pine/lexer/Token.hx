@@ -1,22 +1,61 @@
 package pine.lexer;
 
+enum TokenType
+{
+    INTEGER;
+    FLOAT;
+    STRING;
+    BOOLEAN;
+    NULL;
+    
+    // ops //
+    ADD;
+    SUB;
+    MUL;
+    DIV;
+    MOD;
+    POW;
+    
+    // bin ops //
+    EQ_EQUAL;
+    GT;
+    GT_OR_EQUAL;
+    LW;
+    LW_OR_EQUAL;
+    NOT_EQUAL;
+    ASSIGN;
+    
+    // symbols //
+    LEFT_PAREN;
+    RIGHT_PAREN;
+    LEFT_SQUARE;
+    RIGHT_SQUARE;
+    COMMA;
+    
+    IDENTIFIER;
+    KEYWORD;
+    NEWLINE;
+    EOF;
+}
+
 class Token
 {
-    public var type:String;
+    public var type:TokenType;
     public var value:Dynamic;
     
-    public function new(type:String, ?value:Dynamic)
+    public function new(type:TokenType, ?value:Dynamic)
     {
         this.type = type;
         this.value = value;
     }
     
     @:op(A == B)
-    public function matches(type:String, ?value:Dynamic):Bool
+    public function matches(type:TokenType, ?value:Dynamic):Bool
         return this.type == type && this.value == value;
         
     public function toString()
     {
-        return this.value == null ? 'Token[type = $type]' : 'Token[type = $type | value = $value]';
+        var strType:String = Type.enumConstructor(this.type);
+        return this.value == null ? 'Token(type = $strType)' : 'Token(type = $strType, value = $value)';
     }
 }

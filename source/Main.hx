@@ -5,7 +5,7 @@ class Main
 {
     static function main()
     {
-        switch (Lexer.lex("= == > >= < <="))
+        switch (Lexer.lex('# teste comment'))
         {
             case Ok(tokens):
                 trace("tokens gerados com sucesso!");
