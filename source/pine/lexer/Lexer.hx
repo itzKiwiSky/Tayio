@@ -1,4 +1,4 @@
-package pine;
+package pine.lexer;
 
 import haxe.Exception;
 
@@ -6,9 +6,9 @@ using StringTools;
 
 class Lexer
 {
-    static var position:Int = 0;
     static var line:Int = 0;
     static var cursor:Int = 0; // col
+    static var position:Position;
     static var currentChar:String = "";
     static var source:String = "";
     static var tokens:Array<Token> = [];
@@ -37,76 +37,78 @@ class Lexer
         "module",
     ];
     
+    static var errorRaised:Bool = false;
+    
     public static function lex(src:String)
     {
         source = src;
-        position = 0;
+        position = new Position("", source);
         
-        currentChar = source.charAt(position);
+        position.advance();
         
-        while (position < source.length)
+        while (position.index < source.length && !errorRaised)
         {
             if (~/[ \t]/.match(currentChar))
-                peek();
+                position.advance();
             else if (~/[;\n]/.match(currentChar))
             {
                 tokens.push(new Token("TT_NEWLINE"));
-                peek();
+                position.advance();
             }
             else if (currentChar == "+")
             {
                 tokens.push(new Token("TT_ADD"));
-                peek();
+                position.advance();
             }
             else if (currentChar == "-")
             {
                 tokens.push(new Token("TT_SUB"));
-                peek();
+                position.advance();
             }
             else if (currentChar == "*")
             {
                 tokens.push(new Token("TT_MUL"));
-                peek();
+                position.advance();
             }
             else if (currentChar == "/")
             {
                 tokens.push(new Token("TT_DIV"));
-                peek();
+                position.advance();
             }
             else if (currentChar == "%")
             {
                 tokens.push(new Token("TT_MOD"));
-                peek();
+                position.advance();
             }
             else if (currentChar == "^")
             {
                 tokens.push(new Token("TT_POW"));
-                peek();
+                position.advance();
             }
             else if (currentChar == "(")
             {
                 tokens.push(new Token("TT_LEFT_PAREN"));
-                peek();
+                position.advance();
             }
             else if (currentChar == ")")
             {
                 tokens.push(new Token("TT_RIGHT_PAREN"));
-                peek();
+                position.advance();
             }
             else if (currentChar == "[")
             {
                 tokens.push(new Token("TT_LEFT_SQUARE"));
-                peek();
+                position.advance();
             }
             else if (currentChar == "]")
             {
                 tokens.push(new Token("TT_RIGHT_SQUARE"));
-                peek();
+                position.advance();
             }
             else if (currentChar == ",")
             {
                 tokens.push(new Token("TT_COMMA"));
-                peek();
+                position.advance();
             }
             else if (letterTest.match(currentChar))
                 tokens.push(createIdentifier());
@@ -115,36 +117,26 @@ class Lexer
                 var result:Null<Token> = createNotEqual();
                 
                 if (result == null)
-                    tokens.push(createNotEqual());
+                {
+                    raiseError('SyntaxError:', 'Expected "=" at col: $position\n');
+                    return [];
+                }
+                
+                tokens.push(createNotEqual());
             }
             else
             {
-                var start:Int = position;
+                var start:Int = position.index;
                 var char:String = currentChar;
-                peek();
+                position.advance();
                 // new Exception('SyntaxError: Invalid char $char at $position');
-                Sys.print('SyntaxError: Invalid char $char at col: $position\n');
+                raiseError('SyntaxError', 'Invalid char $char at col: $position\n');
                 return [];
             }
         }
         
         tokens.push(new Token("TT_EOF"));
         return tokens;
-    }
-    
-    // move to next position in the source and return the char
-    static function peek()
-    {
-        position++;
-        currentChar = source.charAt(position);
-    }
-    
-    // move to previous position and return the char
-    
-    static function seekChar()
-    {
-        position--;
-        currentChar = source.charAt(position);
     }
     
     static function createIdentifier():Token
@@ -155,7 +147,7 @@ class Lexer
         while (currentChar != null && ~/[a-zA-Z_]/.match(currentChar))
         {
             result += currentChar;
-            peek();
+            position.advance();
         }
         
         if (keywords.contains(result))
@@ -168,14 +160,20 @@ class Lexer
     
     static function createNotEqual():Null<Token>
     {
-        var start:Int = position;
-        peek();
+        var start:Int = position.index;
+        position.advance();
         if (currentChar == "=")
         {
-            peek();
+            position.advance();
             return new Token("TT_NOT_EQ");
         }
         
         return null;
+    }
+    
+    static function raiseError(error:String, message:String)
+    {
+        Sys.print('$error: $message\n');
+        errorRaised = true;
     }
 }

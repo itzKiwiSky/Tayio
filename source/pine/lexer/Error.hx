@@ -1,4 +1,4 @@
-package pine;
+package pine.lexer;
 
 class Error
 {
