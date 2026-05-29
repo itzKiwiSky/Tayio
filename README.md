@@ -25,6 +25,7 @@ If you don't want to inject all the functions inside the global namespace, no pr
 ```
 
 # Is the same as the first example, but now you can only use "print" or "println" inside the main function
+
 func main() uses pine.std[out, in] do
     println("Hello world")
 end
