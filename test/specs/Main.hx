@@ -1,7 +1,7 @@
 package test.specs;
 
-import pine.Lexer;
-import pine.Token;
+import pine.lexer.Lexer;
+import pine.lexer.Token;
 
 class Main
 {

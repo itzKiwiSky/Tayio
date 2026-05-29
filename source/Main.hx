@@ -5,7 +5,9 @@ class Main
 {
     static function main()
     {
-        switch (Lexer.lex('# teste comment'))
+        var code:String = "func main() uses pineStd do end";
+        
+        switch (Lexer.lex(code))
         {
             case Ok(tokens):
                 trace("tokens gerados com sucesso!");
