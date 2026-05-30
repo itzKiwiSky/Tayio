@@ -40,6 +40,8 @@ enum Node
     
     BlockNode(statements:Array<Node>);
     
+    UseNode(module:String);
+    
     FuncExprNode(params:Array<String>, uses:Null<String>, body:Array<Node>);
     
     FieldCallNode(target:Node, field:String, args:Array<Node>);

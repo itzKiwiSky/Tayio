@@ -1,15 +1,25 @@
 package pine.runtime.packages;
 
-class Stdlib
+class Stdlib implements INativeModule
 {
-    public static function register(env:Environment)
+    public var modname:String = "std";
+    
+    public function new() {}
+    
+    public function getModule():Map<String, Value>
     {
-        env.createVar("print", NativeFuncVal(args ->
+        var module:Map<String, Value> = [];
+        
+        var module:Map<String, Value> = [];
+        module.set("print", NativeFuncVal(args ->
         {
             for (arg in args)
                 Sys.print(valueToString(arg));
             return Ok(NullVal);
         }));
+        return module;
+        
+        return module;
     }
     
     public static function valueToString(v:Value):String

@@ -101,6 +101,16 @@ class Parser
             return Ok(ContinueNode);
         }
         
+        if (current.type == TokenType.KEYWORD && current.value == "use")
+        {
+            advance(); // consome "use"
+            if (current.type != TokenType.IDENTIFIER)
+                return Err(new LangError(null, null, InvalidSyntax, 'Expected module name after "use"'));
+            var name = current.value;
+            advance();
+            return Ok(UseNode(name));
+        }
+        
         // expressão (assignment ou call)
         return parseExpression();
     }

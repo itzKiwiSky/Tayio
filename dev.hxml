@@ -1,4 +1,4 @@
---class-path source
+-cp source
 --main Main
 --library prismcli
---interp
+--run Main.hx
