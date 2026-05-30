@@ -120,6 +120,16 @@ class Lexer
                 tokens.push(new Token(TokenType.RIGHT_SQUARE));
                 position.advance();
             }
+            else if (currentChar == "{")
+            {
+                tokens.push(new Token(TokenType.LEFT_BRACE));
+                position.advance();
+            }
+            else if (currentChar == "}")
+            {
+                tokens.push(new Token(TokenType.RIGHT_BRACE));
+                position.advance();
+            }
             else if (currentChar == ",")
             {
                 tokens.push(new Token(TokenType.COMMA));
@@ -327,6 +337,11 @@ class Lexer
         {
             if (position.currentChar == ".")
             {
+                // check next char looking for "."
+                var next = position.source.charAt(position.index + 1);
+                if (next == ".")
+                    break;
+                    
                 if (dotCount >= 1)
                     break;
                 dotCount++;

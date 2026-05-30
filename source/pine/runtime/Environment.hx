@@ -1,11 +1,11 @@
 package pine.runtime;
 
-class Enviroment
+class Environment
 {
     var variables:Map<String, Value> = [];
-    var parent:Null<Enviroment>;
+    var parent:Null<Environment>;
     
-    public function new(?parent:Enviroment)
+    public function new(?parent:Environment)
     {
         this.parent = parent;
     }
@@ -21,7 +21,7 @@ class Enviroment
         return null;
     }
     
-    function createVar(name:String, value:Value)
+    public function createVar(name:String, value:Value)
     {
         variables.set(name, value);
     }

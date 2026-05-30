@@ -1,9 +1,7 @@
-use pine.stdout
+global a = true
 
-global a = 1
-
-func main() do
-    print("Hello\n")
+if (1 == 2) do
+    a = true
+else do
+    a = false
 end
-
-main()

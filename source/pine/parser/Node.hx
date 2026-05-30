@@ -39,4 +39,11 @@ enum Node
     FieldAccessNode(target:Node, field:String);
     
     BlockNode(statements:Array<Node>);
+    
+    FuncExprNode(params:Array<String>, uses:Null<String>, body:Array<Node>);
+    
+    FieldCallNode(target:Node, field:String, args:Array<Node>);
+    
+    BreakNode;
+    ContinueNode;
 }

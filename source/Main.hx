@@ -7,10 +7,13 @@ import pine.lexer.Lexer;
 
 class Main
 {
-    static function main()
+    static var isDebug:Bool = false;
+    
+    static function main() {}
+    
+    static function replMode()
     {
         Sys.println("Pine REPL");
-        
         while (true)
         {
             Sys.print("|> ");
@@ -19,16 +22,22 @@ class Main
             switch (Lexer.lex(code))
             {
                 case Ok(tokens):
-                    Sys.println("tokens gerados com sucesso!");
-                    Sys.print("[\n");
-                    for (tk in tokens)
-                        Sys.print("    " + tk + "\n");
-                    Sys.print("[\n");
+                    if (isDebug)
+                    {
+                        Sys.println("tokens gerados com sucesso!");
+                        Sys.print("[\n");
+                        for (tk in tokens)
+                            Sys.print("    " + tk + "\n");
+                        Sys.print("[\n");
+                    }
                     switch (Parser.parse(tokens))
                     {
                         case Ok(ast):
-                            Sys.println("AST gerada com sucesso!");
-                            Sys.println(ast); // printa a árvore
+                            if (isDebug)
+                            {
+                                Sys.println("AST gerada com sucesso!");
+                                Sys.println(ast); // printa a árvore
+                            }
                             switch (Runtime.run(ast))
                             {
                                 case Ok(value):

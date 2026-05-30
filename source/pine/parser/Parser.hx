@@ -89,6 +89,18 @@ class Parser
         if (current.type == TokenType.KEYWORD && current.value == "return")
             return parseReturn();
             
+        if (current.type == TokenType.KEYWORD && current.value == "break")
+        {
+            advance();
+            return Ok(BreakNode);
+        }
+        
+        if (current.type == TokenType.KEYWORD && current.value == "continue")
+        {
+            advance();
+            return Ok(ContinueNode);
+        }
+        
         // expressão (assignment ou call)
         return parseExpression();
     }
@@ -625,9 +637,21 @@ class Parser
                     return parseCall(name);
                     
                 // field access: foo.bar
+                
                 if (current.type == TokenType.DOT)
-                    return parseFieldAccess(VarAccessNode(name));
+                {
+                    var fieldTarget:Node = VarAccessNode(name);
+                    advance(); // consome o "."
                     
+                    var field = current.value;
+                    advance(); // consome o nome do field
+                    
+                    if (current.type == TokenType.LEFT_PAREN)
+                        return parseFieldCall(fieldTarget, field);
+                        
+                    return Ok(FieldAccessNode(fieldTarget, field));
+                }
+                
                 // assignment: x = ...
                 if (current.type == TokenType.ASSIGN)
                 {
@@ -640,6 +664,12 @@ class Parser
                 }
                 
                 return Ok(VarAccessNode(name));
+                
+            case TokenType.LEFT_BRACE:
+                return parseDict();
+                
+            case TokenType.KEYWORD if (current.value == "func"):
+                return parseFuncExpr();
                 
             case _:
                 return Err(new LangError(null, null, InvalidSyntax, 'Unexpected token: ${tk.type} "${tk.value}"'));
@@ -709,5 +739,119 @@ class Parser
             return Err(err);
             
         return Ok(ArrayNode(elements));
+    }
+    
+    static function parseDict():ParseResult
+    {
+        advance(); // consome "{"
+        var entries:Array<{key:String, value:Node}> = [];
+        
+        while (current.type != TokenType.RIGHT_BRACE)
+        {
+            if (current.type != TokenType.IDENTIFIER)
+                return Err(new LangError(null, null, InvalidSyntax, 'Expected key name in dict'));
+                
+            var key = current.value;
+            advance(); // consome a chave
+            
+            var err = expect(TokenType.ASSIGN);
+            if (err != null)
+                return Err(err);
+                
+            switch (parseExpression())
+            {
+                case Ok(val):
+                    entries.push({key: key, value: val});
+                case other:
+                    return other;
+            }
+            
+            if (current.type == TokenType.COMMA)
+                advance();
+        }
+        
+        var err = expect(TokenType.RIGHT_BRACE);
+        if (err != null)
+            return Err(err);
+            
+        return Ok(DictNode(entries));
+    }
+    
+    static function parseFuncExpr():ParseResult
+    {
+        advance(); // consome "func"
+        
+        var err = expect(TokenType.LEFT_PAREN);
+        if (err != null)
+            return Err(err);
+            
+        var params:Array<String> = [];
+        while (current.type != TokenType.RIGHT_PAREN)
+        {
+            if (current.type != TokenType.IDENTIFIER)
+                return Err(new LangError(null, null, InvalidSyntax, 'Expected parameter name'));
+                
+            params.push(current.value);
+            advance();
+            
+            if (current.type == TokenType.COMMA)
+                advance();
+        }
+        
+        err = expect(TokenType.RIGHT_PAREN);
+        if (err != null)
+            return Err(err);
+            
+        var uses:Null<String> = null;
+        if (current.type == TokenType.KEYWORD && current.value == "uses")
+        {
+            advance();
+            if (current.type != TokenType.IDENTIFIER)
+                return Err(new LangError(null, null, InvalidSyntax, 'Expected package name after "uses"'));
+            uses = current.value;
+            advance();
+        }
+        
+        err = expect(TokenType.KEYWORD, "do");
+        if (err != null)
+            return Err(err);
+            
+        switch (parseBlock())
+        {
+            case Ok(BlockNode(body)):
+                var err = expect(TokenType.KEYWORD, "end");
+                if (err != null)
+                    return Err(err);
+                return Ok(FuncExprNode(params, uses, body));
+            case Err(e):
+                return Err(e);
+            case _:
+                return Err(new LangError(null, null, InvalidSyntax, 'Expected block'));
+        }
+    }
+    
+    static function parseFieldCall(target:Node, field:String):ParseResult
+    {
+        advance(); // consome "("
+        var args:Array<Node> = [];
+        
+        while (current.type != TokenType.RIGHT_PAREN)
+        {
+            switch (parseExpression())
+            {
+                case Ok(n):
+                    args.push(n);
+                case other:
+                    return other;
+            }
+            if (current.type == TokenType.COMMA)
+                advance();
+        }
+        
+        var err = expect(TokenType.RIGHT_PAREN);
+        if (err != null)
+            return Err(err);
+            
+        return Ok(FieldCallNode(target, field, args));
     }
 }
