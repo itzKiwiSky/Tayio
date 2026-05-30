@@ -31,6 +31,8 @@ enum TokenType
     LEFT_SQUARE;
     RIGHT_SQUARE;
     COMMA;
+    DOT; // .
+    DOT3; // ...
     
     IDENTIFIER;
     KEYWORD;
@@ -49,9 +51,8 @@ class Token
         this.value = value;
     }
     
-    @:op(A == B)
-    public function matches(type:TokenType, ?value:Dynamic):Bool
-        return this.type == type && this.value == value;
+    public function is(type:TokenType, ?value:Dynamic):Bool
+        return this.type == type && (value == null || this.value == value);
         
     public function toString()
     {

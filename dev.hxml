@@ -1,4 +1,3 @@
---cpp bin/
 --class-path source
 --main Main
 --library prismcli

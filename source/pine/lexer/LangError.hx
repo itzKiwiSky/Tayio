@@ -32,6 +32,8 @@ class LangError
             case InvalidSyntax: "Invalid Syntax";
             case RuntimeError: "Runtime Error";
         }
-        return '$name: $details\nFile ${posStart.fn}, line ${posStart.line + 1}';
+        var location = posStart != null ? '\nFile ${posStart.fn}, line ${posStart.line + 1}' : '';
+        
+        return '$name: $details$location';
     }
 }

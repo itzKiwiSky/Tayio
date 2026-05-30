@@ -1,7 +1,7 @@
 package pine.lexer;
 
 import pine.lexer.Token.TokenType;
-import pine.lexer.Error.LangError;
+import pine.lexer.LangError;
 import haxe.Exception;
 
 using StringTools;
@@ -21,10 +21,10 @@ class Lexer
     static var source:String = "";
     static var tokens:Array<Token> = [];
     
-    static var letterTest:EReg = ~/[aA-zZ]/i;
+    static var letterTest:EReg = ~/[a-zA-Z_]/;
     
     public static var keywords:Array<String> = [
-        "scoped",
+        "local",
         "global",
         "if",
         "else",
@@ -46,20 +46,18 @@ class Lexer
         "extends",
         "export",
         "module",
-        "true",
-        "false",
     ];
-    
-    static var errorRaised:Bool = false;
     
     public static function lex(src:String)
     {
         source = src;
         position = new Position("<stdin>", source);
         
+        tokens = [];
+        
         position.advance();
         
-        while (position.index < source.length && !errorRaised)
+        while (position.index < source.length)
         {
             currentChar = position.currentChar;
             if (~/[ \t]/.match(currentChar))
@@ -125,6 +123,27 @@ class Lexer
             {
                 tokens.push(new Token(TokenType.COMMA));
                 position.advance();
+            }
+            else if (currentChar == ".")
+            {
+                var posStart = position.copy();
+                position.advance();
+                currentChar = position.currentChar;
+                
+                if (currentChar == ".")
+                {
+                    position.advance();
+                    currentChar = position.currentChar;
+                    
+                    if (currentChar != ".")
+                        return Err(new LangError(posStart, position.copy(), InvalidSyntax, 'Expected "..." for range'));
+                        
+                    position.advance();
+                    currentChar = position.currentChar;
+                    tokens.push(new Token(TokenType.DOT3));
+                }
+                else
+                    tokens.push(new Token(TokenType.DOT));
             }
             else if (letterTest.match(currentChar))
                 tokens.push(createIdentifier());
@@ -253,7 +272,7 @@ class Lexer
             return new Token(TokenType.LW_OR_EQUAL);
         }
         
-        return new Token(TokenType.LW_OR_EQUAL);
+        return new Token(TokenType.LW);
     }
     
     static function createString():Null<Token>
@@ -320,11 +339,5 @@ class Lexer
             return new Token(TokenType.INTEGER, Std.parseInt(res));
         else
             return new Token(TokenType.FLOAT, Std.parseFloat(res));
-    }
-    
-    static function raiseError(error:String, message:String)
-    {
-        Sys.print('$error: $message\n');
-        errorRaised = true;
     }
 }
