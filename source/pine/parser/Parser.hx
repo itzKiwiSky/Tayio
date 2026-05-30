@@ -585,7 +585,6 @@ class Parser
             case TokenType.INTEGER:
                 advance();
                 return Ok(IntNode(tk.value));
-                s
             case TokenType.FLOAT:
                 advance();
                 return Ok(FloatNode(tk.value));

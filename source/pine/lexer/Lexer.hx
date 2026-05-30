@@ -20,6 +20,7 @@ class Lexer
     static var currentChar:String = "";
     static var source:String = "";
     static var tokens:Array<Token> = [];
+    public static var filename:String = "<stdin>";
     
     static var letterTest:EReg = ~/[a-zA-Z_]/;
     
@@ -51,7 +52,7 @@ class Lexer
     public static function lex(src:String)
     {
         source = src;
-        position = new Position("<stdin>", source);
+        position = new Position(filename, source);
         
         tokens = [];
         
@@ -207,6 +208,7 @@ class Lexer
         var tkType = switch (result)
         {
             case "true" | "false": TokenType.BOOLEAN;
+            case "null": TokenType.NULL;
             case _ if (keywords.contains(result)): TokenType.KEYWORD;
             case _: TokenType.IDENTIFIER;
         }
