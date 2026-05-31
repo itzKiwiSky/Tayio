@@ -26,6 +26,8 @@ class Main
             if (args[1] == "--debug" || args[1] == "-d")
                 PineEntry.isDebug = true;
             // run test here //
+            
+            TestClass.test();
         }
         else
         {
