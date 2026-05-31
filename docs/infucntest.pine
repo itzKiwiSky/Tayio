@@ -1,0 +1,11 @@
+use pine.std
+
+func main() do
+    exec(func() do
+        std.println("Hello")
+    end)
+end
+
+func exec(fn) do
+    fn()
+end
