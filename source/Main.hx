@@ -47,6 +47,7 @@ class Main
     
     static function run(code:String)
     {
+        code = StringTools.replace(code, "\r\n", "\n");
         switch (Lexer.lex(code))
         {
             case Ok(tokens):
@@ -69,7 +70,7 @@ class Main
                         switch (Runtime.run(ast))
                         {
                             case Ok(value):
-                                Sys.println(value);
+                                if (isDebug) Sys.println(value);
                                 
                             case Err(error):
                                 Sys.println(error.asString());

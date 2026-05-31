@@ -1,3 +1,0 @@
-module System
-
-export IO implements IO

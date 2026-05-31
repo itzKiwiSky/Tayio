@@ -1,7 +1,14 @@
-global a = true
+use std
 
-if (1 == 2) do
-    a = true
-else do
-    a = false
+func main() do
+    local a = fib(10)
+    std.print(a)
+end
+
+func fib(n) do
+    if (n < 3) do
+        return 1
+    else do
+        return fib(n - 1) + fib(n - 2)
+    end
 end
