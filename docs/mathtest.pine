@@ -1,0 +1,6 @@
+use pine.std.io
+use pine.std.math
+
+func main() do
+    out.println(floor(2.43))
+end

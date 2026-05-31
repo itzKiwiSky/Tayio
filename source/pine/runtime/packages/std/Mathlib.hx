@@ -1,20 +1,19 @@
 package pine.runtime.packages.std;
 
+import pine.runtime.INativePackage.IPackage;
 import pine.lexer.LangError;
 
-class MathLib implements INativeModule
+class MathLib implements IPackage
 {
     public function new() {}
     
-    public var modname:String = "pine.std.math";
-    
     public function getModule():Map<String, Value>
     {
-        var module:Map<String, Value> = [];
+        var mod:Map<String, Value> = [];
         
-        module.set("PI", FloatVal(Math.PI));
+        mod.set("PI", FloatVal(Math.PI));
         
-        module.set("floor", NativeFuncVal(args ->
+        mod.set("floor", NativeFuncVal(args ->
         {
             Utils.expectArgs(args, "floor", 1);
             
@@ -26,7 +25,7 @@ class MathLib implements INativeModule
             }
         }));
         
-        module.set("ceil", NativeFuncVal(args ->
+        mod.set("ceil", NativeFuncVal(args ->
         {
             Utils.expectArgs(args, "ceil", 1);
             
@@ -38,7 +37,7 @@ class MathLib implements INativeModule
             }
         }));
         
-        module.set("abs", NativeFuncVal(args ->
+        mod.set("abs", NativeFuncVal(args ->
         {
             Utils.expectArgs(args, "ceil", 1);
             switch (args[0])
@@ -50,7 +49,7 @@ class MathLib implements INativeModule
         }));
         
         // Math
-        module.set("sqrt", NativeFuncVal(args ->
+        mod.set("sqrt", NativeFuncVal(args ->
         {
             Utils.expectArgs(args, "sqrt", 1);
             switch (args[0])
@@ -61,6 +60,6 @@ class MathLib implements INativeModule
             }
         }));
         
-        return module;
+        return mod;
     }
 }

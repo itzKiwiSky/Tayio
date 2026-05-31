@@ -1,5 +1,8 @@
 package pine.runtime;
 
+import pine.runtime.INativePackage.INativeModule;
+import pine.runtime.INativePackage.IPackage;
+
 class NativeNamespace implements INativeModule
 {
     public var modname:String;
@@ -12,7 +15,7 @@ class NativeNamespace implements INativeModule
         this.modules = [];
     }
     
-    public function add(name:String, pack:INativeModule):Void
+    public function add(name:String, pack:IPackage):Void
     {
         modules.set(name, DictVal(pack.getModule()));
     }

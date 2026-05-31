@@ -1,9 +1,9 @@
 package pine.runtime.packages.std.io;
 
-class Stdout implements INativeModule
+import pine.runtime.INativePackage.IPackage;
+
+class Stdout implements IPackage
 {
-    public var modname:String = "out";
-    
     public function new() {}
     
     public function getModule():Map<String, Value>

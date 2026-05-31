@@ -1,10 +1,12 @@
 package pine.runtime;
 
-import pine.runtime.packages.std.io.Stdio;
+import pine.runtime.INativePackage.INativeModule;
+import pine.runtime.packages.std.Stdlib.StdLib;
 import pine.parser.Parser;
 import pine.lexer.Lexer;
 import pine.lexer.Token;
 import pine.parser.Node;
+import pine.parser.Node.UsesDecl;
 import pine.lexer.LangError;
 import pine.runtime.Value;
 
@@ -33,16 +35,13 @@ class Runtime
         
     static function resolveModulePath(module:String):Null<String>
     {
-        // pega o diretório do arquivo atual
-        var baseDir = haxe.io.Path.directory(Runtime.currentFile);
+        var baseDir = haxe.io.Path.directory(currentFile);
         var relative = module.split(".").join("/");
         
-        // tenta arquivo direto
         var filePath = haxe.io.Path.join([baseDir, relative + ".pine"]);
         if (sys.FileSystem.exists(filePath))
             return filePath;
             
-        // tenta entry point de pasta
         var dirPath = haxe.io.Path.join([baseDir, relative, "start.pine"]);
         if (sys.FileSystem.exists(dirPath))
             return dirPath;
@@ -50,9 +49,90 @@ class Runtime
         return null;
     }
     
+    // resolve o Map de um módulo — direto ou navegando pelo pai
+    static function resolveNativeModule(moduleName:String):Null<Map<String, Value>>
+    {
+        if (_nativeModules.exists(moduleName))
+            return _nativeModules.get(moduleName);
+            
+        var parts = moduleName.split(".");
+        var field = parts.pop();
+        var parent = parts.join(".");
+        
+        if (_nativeModules.exists(parent))
+        {
+            var pDict = _nativeModules.get(parent);
+            var v = pDict.get(field);
+            if (v != null)
+                switch (v)
+                {
+                    case DictVal(d):
+                        return d;
+                    case _:
+                }
+        }
+        
+        return null;
+    }
+    
+    // injeta módulo no callEnv conforme UsesDecl
+    static function injectUses(uses:UsesDecl, callEnv:Environment):Void
+    {
+        var moduleDict = resolveNativeModule(uses.module);
+        if (moduleDict == null)
+            return;
+            
+        if (uses.imports != null)
+        {
+            for (importName in uses.imports)
+            {
+                var v = moduleDict.get(importName);
+                if (v != null)
+                    switch (v)
+                    {
+                        case DictVal(d):
+                            for (k => fv in d)
+                                callEnv.createVar(k, fv);
+                        case _:
+                            callEnv.createVar(importName, v);
+                    }
+            }
+        }
+        else
+        {
+            for (k => v in moduleDict)
+                callEnv.createVar(k, v);
+        }
+    }
+    
+    // executa uma FuncVal com args já avaliados
+    static function callFunc(params:Array<String>, uses:Null<UsesDecl>, body:Array<Node>, funcEnv:Environment, evaledArgs:Array<Value>):RuntimeResult
+    {
+        var callEnv = new Environment(funcEnv);
+        if (uses != null)
+            injectUses(uses, callEnv);
+        for (i in 0...params.length)
+            callEnv.createVar(params[i], evaledArgs[i]);
+        for (stmt in body)
+        {
+            switch (evaluate(stmt, callEnv))
+            {
+                case Ok(_):
+                case Signal(SReturn(v)):
+                    return Ok(v);
+                case other:
+                    return other;
+            }
+        }
+        return Ok(NullVal);
+    }
+    
     public static function run(ast:Node):RuntimeResult
     {
-        addNativeModule(new Stdio());
+        // reseta estado entre chamadas
+        globalEnv = new Environment();
+        _nativeModules = [];
+        addNativeModule(new StdLib());
         
         switch (evaluate(ast, globalEnv))
         {
@@ -67,37 +147,8 @@ class Runtime
             
         switch (mainFunc)
         {
-            // ← fix: agora tem uses
             case FuncVal(params, uses, body, funcEnv):
-                var callEnv = new Environment(funcEnv);
-                
-                if (uses != null && _nativeModules.exists(uses.module))
-                {
-                    var module = _nativeModules.get(uses.module);
-                    
-                    if (uses.imports != null)
-                    {
-                        // injeta só os imports especificados
-                        for (name in uses.imports)
-                        {
-                            var v = module.get(name);
-                            if (v != null)
-                                callEnv.createVar(name, v);
-                        }
-                    }
-                    else
-                    {
-                        // injeta tudo do módulo
-                        for (k => v in module)
-                            callEnv.createVar(k, v);
-                    }
-                }
-                switch (executeBlock(body, callEnv))
-                {
-                    case Signal(SReturn(v)): return Ok(v);
-                    case Err(e): return Err(e);
-                    case _: return Ok(NullVal);
-                }
+                return callFunc(params, uses, body, funcEnv, []);
             case _:
                 return Err(new LangError(null, null, RuntimeError, '"main" must be a function'));
         }
@@ -119,35 +170,31 @@ class Runtime
                 }
                 return Ok(last);
                 
-            case IntNode(value):
-                return Ok(IntVal(value));
-                
-            case FloatNode(value):
-                return Ok(FloatVal(value));
-                
-            case StringNode(value):
-                return Ok(StringVal(value));
-                
-            case BoolNode(value):
-                return Ok(BoolVal(value));
-                
+            case IntNode(v):
+                return Ok(IntVal(v));
+            case FloatNode(v):
+                return Ok(FloatVal(v));
+            case StringNode(v):
+                return Ok(StringVal(v));
+            case BoolNode(v):
+                return Ok(BoolVal(v));
             case NullNode:
                 return Ok(NullVal);
                 
             case BinOpNode(left, op, right):
-                var leftVal:Value = NullVal;
-                var rightVal:Value = NullVal;
+                var lv:Value = NullVal;
+                var rv:Value = NullVal;
                 switch (evaluate(left, env))
                 {
-                    case Ok(v): leftVal = v;
+                    case Ok(v): lv = v;
                     case other: return other;
                 }
                 switch (evaluate(right, env))
                 {
-                    case Ok(v): rightVal = v;
+                    case Ok(v): rv = v;
                     case other: return other;
                 }
-                return applyBinOp(leftVal, op, rightVal);
+                return applyBinOp(lv, op, rv);
                 
             case UnaryOpNode(op, node):
                 switch (evaluate(node, env))
@@ -187,19 +234,15 @@ class Runtime
                     case Ok(condVal):
                         if (isTruthy(condVal))
                             return executeBlock(body, new Environment(env));
-                            
                         for (ei in elseIfs)
                         {
                             switch (evaluate(ei.cond, env))
                             {
-                                case Ok(cv):
-                                    if (isTruthy(cv)) return executeBlock(ei.body, new Environment(env));
+                                case Ok(cv): if (isTruthy(cv)) return executeBlock(ei.body, new Environment(env));
                                 case other: return other;
                             }
                         }
-                        
                         if (elseBody != null) return executeBlock(elseBody, new Environment(env));
-                        
                     case other: return other;
                 }
                 return Ok(NullVal);
@@ -244,12 +287,10 @@ class Runtime
                                     }
                                 }
                                 return Ok(NullVal);
-                            case Ok(_):
-                                return Err(new LangError(null, null, RuntimeError, 'For range expects integers'));
+                            case Ok(_): return Err(new LangError(null, null, RuntimeError, 'For range expects integers'));
                             case other: return other;
                         }
-                    case Ok(_):
-                        return Err(new LangError(null, null, RuntimeError, 'For range expects integers'));
+                    case Ok(_): return Err(new LangError(null, null, RuntimeError, 'For range expects integers'));
                     case other: return other;
                 }
                 
@@ -269,8 +310,7 @@ class Runtime
                                 case _:
                             }
                         }
-                    case Ok(_):
-                        return Err(new LangError(null, null, RuntimeError, 'Expected array in for in'));
+                    case Ok(_): return Err(new LangError(null, null, RuntimeError, 'Expected array in for in'));
                     case other: return other;
                 }
                 return Ok(NullVal);
@@ -307,17 +347,14 @@ class Runtime
                         if (f == null)
                             return Err(new LangError(null, null, RuntimeError, 'Field "$field" does not exist'));
                         return Ok(f);
-                    case Ok(_):
-                        return Err(new LangError(null, null, RuntimeError, 'Cannot access field "$field" on a non-dict value'));
+                    case Ok(_): return Err(new LangError(null, null, RuntimeError, 'Cannot access field "$field" on a non-dict value'));
                     case other: return other;
                 }
                 
-            // ← fix: agora passa uses
             case FuncDeclNode(name, params, uses, body):
                 env.createVar(name, FuncVal(params, uses, body, env));
                 return Ok(NullVal);
                 
-            // ← fix: agora passa uses
             case FuncExprNode(params, uses, body):
                 return Ok(FuncVal(params, uses, body, env));
                 
@@ -338,48 +375,10 @@ class Runtime
                 
                 switch (funcDec)
                 {
-                    // ← fix: agora tem uses, e sem loop duplicado
-                    case FuncVal(params, uses, body, funcEnv):
-                        var callEnv = new Environment(funcEnv);
-                        
-                        if (uses != null && _nativeModules.exists(uses.module))
-                        {
-                            var module = _nativeModules.get(uses.module);
-                            if (uses.imports != null)
-                            {
-                                for (name in uses.imports)
-                                {
-                                    var v = module.get(name);
-                                    if (v != null)
-                                        callEnv.createVar(name, v);
-                                }
-                            }
-                            else
-                            {
-                                for (k => v in module)
-                                    callEnv.createVar(k, v);
-                            }
-                        }
-                        
-                        for (i in 0...params.length)
-                            callEnv.createVar(params[i], evaledArgs[i]); // ← FALTA ISSO!
-                        for (stmt in body)
-                        {
-                            switch (evaluate(stmt, callEnv))
-                            {
-                                case Ok(_):
-                                case Signal(SReturn(v)): return Ok(v);
-                                case other: return other;
-                            }
-                        }
-                        
-                    case NativeFuncVal(func):
-                        return func(evaledArgs);
-                        
-                    case _:
-                        return Err(new LangError(null, null, RuntimeError, '"$name" is not a function'));
+                    case FuncVal(params, uses, body, funcEnv): return callFunc(params, uses, body, funcEnv, evaledArgs);
+                    case NativeFuncVal(func): return func(evaledArgs);
+                    case _: return Err(new LangError(null, null, RuntimeError, '"$name" is not a function'));
                 }
-                return Ok(NullVal);
                 
             case FieldCallNode(target, field, args):
                 switch (evaluate(target, env))
@@ -401,45 +400,12 @@ class Runtime
                         
                         switch (funcVal)
                         {
-                            // ← fix: agora tem uses
-                            case FuncVal(params, uses, body, funcEnv):
-                                var callEnv = new Environment(funcEnv);
-                                
-                                if (uses != null && _nativeModules.exists(uses.module))
-                                {
-                                    var module = _nativeModules.get(uses.module);
-                                    if (uses.imports != null)
-                                    {
-                                        for (name in uses.imports)
-                                        {
-                                            var v = module.get(name);
-                                            if (v != null)
-                                                callEnv.createVar(name, v);
-                                        }
-                                    }
-                                    else
-                                    {
-                                        for (k => v in module)
-                                            callEnv.createVar(k, v);
-                                    }
-                                }
-                                switch (executeBlock(body, callEnv))
-                                {
-                                    case Signal(SReturn(v)): return Ok(v);
-                                    case Err(e): return Err(e);
-                                    case Signal(s): return Signal(s);
-                                    case _: return Ok(NullVal);
-                                }
-                                
-                            case NativeFuncVal(func):
-                                return func(evaledArgs);
-                                
-                            case _:
-                                return Err(new LangError(null, null, RuntimeError, '"$field" is not a function'));
+                            case FuncVal(params, uses, body, funcEnv): return callFunc(params, uses, body, funcEnv, evaledArgs);
+                            case NativeFuncVal(func): return func(evaledArgs);
+                            case _: return Err(new LangError(null, null, RuntimeError, '"$field" is not a function'));
                         }
                         
-                    case Ok(_):
-                        return Err(new LangError(null, null, RuntimeError, 'Cannot call field "$field" on a non-dict value'));
+                    case Ok(_): return Err(new LangError(null, null, RuntimeError, 'Cannot call field "$field" on a non-dict value'));
                     case other: return other;
                 }
                 
@@ -454,33 +420,59 @@ class Runtime
                 
             case BreakNode:
                 return Signal(SBreak);
-                
             case ContinueNode:
                 return Signal(SContinue);
                 
             case UseNode(module):
-                // first check if is native
+                // 1. nativo direto
+                // trace(_nativeModules);
+                for (key => value in _nativeModules)
+                {
+                    trace(' - ${key} : ${value}\n');
+                }
                 if (_nativeModules.exists(module))
                 {
                     var alias = module.split(".").pop();
-                    var dict = DictVal(_nativeModules.get(module));
-                    globalEnv.createVar(alias, dict);
+                    globalEnv.createVar(alias, DictVal(_nativeModules.get(module)));
+                    // trace(globalEnv.variables);
                     return Ok(NullVal);
                 }
                 
-                // else try resolve the path
+                // 2. navega pelo pai (pine.std.io → pine.std["io"] → injeta out/in)
+                var parts = module.split(".");
+                var fieldName = parts[parts.length - 1];
+                var parent = parts.slice(0, parts.length - 1).join(".");
+                
+                if (parent != "" && _nativeModules.exists(parent))
+                {
+                    var pDict = _nativeModules.get(parent);
+                    var field = pDict.get(fieldName);
+                    trace("field encontrado: " + field); // ← add
+                    if (field != null)
+                    {
+                        switch (field)
+                        {
+                            case DictVal(entries):
+                                for (k => v in entries)
+                                    globalEnv.createVar(k, v);
+                            case _:
+                                globalEnv.createVar(fieldName, field);
+                        }
+                        return Ok(NullVal);
+                    }
+                }
+                
+                // 3. script
                 var path = resolveModulePath(module);
                 if (path == null)
                     return Err(new LangError(null, null, RuntimeError, 'Module "$module" not found'));
                     
                 var source = sys.io.File.getContent(path);
-                
                 var tokens = switch (Lexer.lex(source))
                 {
                     case Ok(t): t;
                     case Err(e): return Err(e);
                 }
-                
                 var ast = switch (Parser.parse(tokens))
                 {
                     case Ok(n): n;
@@ -501,29 +493,22 @@ class Runtime
                     if (v != null)
                         moduleDict.set(name, v);
                 }
-                
-                var alias = module.split(".").pop();
-                globalEnv.createVar(alias, DictVal(moduleDict));
+                globalEnv.createVar(module.split(".").pop(), DictVal(moduleDict));
                 return Ok(NullVal);
                 
-            case ModuleNode(name):
-                // register the mod name for now
+            case ModuleNode(_):
                 return Ok(NullVal);
                 
             case ExportNode(node):
-                // mark and execute as exported
                 switch (evaluate(node, env))
                 {
                     case Ok(_):
                     case other: return other;
                 }
-                
                 switch (node)
                 {
-                    case FuncDeclNode(name, _, _, _):
-                        env.markExport(name);
-                    case VarDeclNode(_, name, _):
-                        env.markExport(name);
+                    case FuncDeclNode(name, _, _, _): env.markExport(name);
+                    case VarDeclNode(_, name, _): env.markExport(name);
                     case _:
                 }
                 return Ok(NullVal);
@@ -685,14 +670,12 @@ class Runtime
     }
     
     static function isTruthy(value:Value):Bool
-    {
         return switch (value)
         {
             case BoolVal(v): v;
             case _: false;
         }
-    }
-    
+        
     static function executeBlock(body:Array<Node>, env:Environment):RuntimeResult
     {
         var last:Value = NullVal;

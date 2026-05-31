@@ -2,7 +2,7 @@ package pine.runtime;
 
 class Environment
 {
-    var variables:Map<String, Value> = [];
+    public var variables:Map<String, Value> = [];
     
     var parent:Null<Environment>;
     
