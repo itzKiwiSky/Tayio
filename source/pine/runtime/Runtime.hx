@@ -426,10 +426,6 @@ class Runtime
             case UseNode(module):
                 // 1. nativo direto
                 // trace(_nativeModules);
-                for (key => value in _nativeModules)
-                {
-                    trace(' - ${key} : ${value}\n');
-                }
                 if (_nativeModules.exists(module))
                 {
                     var alias = module.split(".").pop();
@@ -447,7 +443,6 @@ class Runtime
                 {
                     var pDict = _nativeModules.get(parent);
                     var field = pDict.get(fieldName);
-                    trace("field encontrado: " + field); // ← add
                     if (field != null)
                     {
                         switch (field)

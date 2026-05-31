@@ -367,10 +367,10 @@ class Parser
         {
             advance(); // eat "else"
             
-            err = expect(TokenType.KEYWORD, "do");
-            if (err != null)
-                return Err(err);
-                
+            // err = expect(TokenType.KEYWORD, "do");
+            // if (err != null)
+            //    return Err(err);
+            
             switch (parseBlock())
             {
                 case Ok(BlockNode(eb)):

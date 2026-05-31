@@ -1,0 +1,11 @@
+use pine.std.io
+
+
+func main() do
+    local a = 1
+    if (a == 2) do
+        out.println("true")
+    else
+        out.println("false")
+    end
+end

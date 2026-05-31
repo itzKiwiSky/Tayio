@@ -1,3 +1,4 @@
+import pine.PineEntry;
 import Type.ValueType;
 import pine.runtime.Runtime;
 import prismcli.CLI;
@@ -16,22 +17,28 @@ class Main
         if (args[0] == "repl")
         {
             if (args[1] == "--debug" || args[1] == "-d")
-                isDebug = true;
+                PineEntry.isDebug = true;
                 
             replMode();
         }
+        else if (args[0] == "test")
+        {
+            if (args[1] == "--debug" || args[1] == "-d")
+                PineEntry.isDebug = true;
+            // run test here //
+        }
         else
         {
-            // com argumento → roda o arquivo
             var path = args[0];
             if (!sys.FileSystem.exists(path))
             {
                 Sys.println('File "$path" not found');
                 Sys.exit(1);
             }
-            Runtime.currentFile = path;
+            PineEntry.setFilename(path);
+            PineEntry.setIn(path);
             var source:String = sys.io.File.getContent(path);
-            run(source);
+            PineEntry.run(source);
         }
     }
     
@@ -42,49 +49,8 @@ class Main
         {
             Sys.print("|> ");
             var code:String = Sys.stdin().readLine();
-            run(code);
-        }
-    }
-    
-    static function run(code:String)
-    {
-        switch (Lexer.lex(code))
-        {
-            case Ok(tokens):
-                if (isDebug)
-                {
-                    Sys.println("tokens gerados com sucesso!");
-                    Sys.print("[\n");
-                    for (tk in tokens)
-                        Sys.print("    " + tk + "\n");
-                    Sys.print("[\n");
-                }
-                switch (Parser.parse(tokens))
-                {
-                    case Ok(ast):
-                        if (isDebug)
-                        {
-                            Sys.println("AST gerada com sucesso!");
-                            Sys.println(ast); // printa a árvore
-                        }
-                        switch (Runtime.run(ast))
-                        {
-                            case Ok(value):
-                                if (isDebug) Sys.println(value);
-                                
-                            case Err(error):
-                                Sys.println(error.asString());
-                                
-                            case Signal(signal):
-                                Sys.println('Signal triggered $signal');
-                        }
-                        
-                    case Err(error):
-                        Sys.println(error.asString());
-                }
-                
-            case Err(error):
-                Sys.println(error.asString());
+            PineEntry.setIn("<stdin>");
+            PineEntry.run(code);
         }
     }
 }
