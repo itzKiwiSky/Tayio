@@ -1,0 +1,14 @@
+use pine.std
+
+func main() do
+    std.println("Fibonacci with 11")
+    std.print(fib(11))
+end
+
+func fib(n) do
+    if (n < 3) do
+        return 1
+    else do
+        return fib(n - 1) + fib(n - 2)
+    end
+end
