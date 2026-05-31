@@ -1,8 +1,8 @@
 package pine.runtime;
 
+import pine.runtime.packages.std.io.Stdio;
 import pine.parser.Parser;
 import pine.lexer.Lexer;
-import pine.runtime.packages.Stdlib;
 import pine.lexer.Token;
 import pine.parser.Node;
 import pine.lexer.LangError;
@@ -51,7 +51,7 @@ class Runtime
     
     public static function run(ast:Node):RuntimeResult
     {
-        addNativeModule(new Stdlib());
+        addNativeModule(new Stdio());
         
         switch (evaluate(ast, globalEnv))
         {
@@ -69,9 +69,28 @@ class Runtime
             // ← fix: agora tem uses
             case FuncVal(params, uses, body, funcEnv):
                 var callEnv = new Environment(funcEnv);
-                if (uses != null && _nativeModules.exists(uses))
-                    for (k => v in _nativeModules.get(uses))
-                        callEnv.createVar(k, v);
+                
+                if (uses != null && _nativeModules.exists(uses.module))
+                {
+                    var module = _nativeModules.get(uses.module);
+                    
+                    if (uses.imports != null)
+                    {
+                        // injeta só os imports especificados
+                        for (name in uses.imports)
+                        {
+                            var v = module.get(name);
+                            if (v != null)
+                                callEnv.createVar(name, v);
+                        }
+                    }
+                    else
+                    {
+                        // injeta tudo do módulo
+                        for (k => v in module)
+                            callEnv.createVar(k, v);
+                    }
+                }
                 switch (executeBlock(body, callEnv))
                 {
                     case Signal(SReturn(v)): return Ok(v);
@@ -321,11 +340,25 @@ class Runtime
                     // ← fix: agora tem uses, e sem loop duplicado
                     case FuncVal(params, uses, body, funcEnv):
                         var callEnv = new Environment(funcEnv);
-                        if (uses != null && _nativeModules.exists(uses))
-                            for (k => v in _nativeModules.get(uses))
-                                callEnv.createVar(k, v);
-                        for (i in 0...params.length)
-                            callEnv.createVar(params[i], evaledArgs[i]);
+                        
+                        if (uses != null && _nativeModules.exists(uses.module))
+                        {
+                            var module = _nativeModules.get(uses.module);
+                            if (uses.imports != null)
+                            {
+                                for (name in uses.imports)
+                                {
+                                    var v = module.get(name);
+                                    if (v != null)
+                                        callEnv.createVar(name, v);
+                                }
+                            }
+                            else
+                            {
+                                for (k => v in module)
+                                    callEnv.createVar(k, v);
+                            }
+                        }
                         for (stmt in body)
                         {
                             switch (evaluate(stmt, callEnv))
@@ -367,11 +400,25 @@ class Runtime
                             // ← fix: agora tem uses
                             case FuncVal(params, uses, body, funcEnv):
                                 var callEnv = new Environment(funcEnv);
-                                if (uses != null && _nativeModules.exists(uses))
-                                    for (k => v in _nativeModules.get(uses))
-                                        callEnv.createVar(k, v);
-                                for (i in 0...params.length)
-                                    callEnv.createVar(params[i], evaledArgs[i]);
+                                
+                                if (uses != null && _nativeModules.exists(uses.module))
+                                {
+                                    var module = _nativeModules.get(uses.module);
+                                    if (uses.imports != null)
+                                    {
+                                        for (name in uses.imports)
+                                        {
+                                            var v = module.get(name);
+                                            if (v != null)
+                                                callEnv.createVar(name, v);
+                                        }
+                                    }
+                                    else
+                                    {
+                                        for (k => v in module)
+                                            callEnv.createVar(k, v);
+                                    }
+                                }
                                 switch (executeBlock(body, callEnv))
                                 {
                                     case Signal(SReturn(v)): return Ok(v);

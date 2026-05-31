@@ -1,0 +1,4 @@
+
+func main() uses pine.std.io do
+    out.print("Hello from pine")
+end

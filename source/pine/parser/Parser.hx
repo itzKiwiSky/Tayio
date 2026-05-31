@@ -1,5 +1,6 @@
 package pine.parser;
 
+import pine.parser.Node.UsesDecl;
 import pine.lexer.Token;
 import pine.lexer.Token.TokenType;
 import pine.lexer.LangError;
@@ -215,7 +216,7 @@ class Parser
             return Err(err);
             
         // uses (opcional)
-        var uses:Null<String> = null;
+        var uses:Null<UsesDecl> = null;
         if (current.type == TokenType.KEYWORD && current.value == "uses")
         {
             advance(); // eat "uses"
@@ -235,7 +236,33 @@ class Parser
                 advance();
             }
             
-            uses = usesName;
+            var imports:Null<Array<String>> = null;
+            if (current.type == TokenType.LEFT_SQUARE)
+            {
+                advance(); // eat [
+                imports = [];
+                
+                while (current.type != TokenType.RIGHT_SQUARE)
+                {
+                    if (current.type != TokenType.IDENTIFIER)
+                        return return Err(new LangError(null, null, InvalidSyntax, 'Expected import name'));
+                    imports.push(current.value);
+                    
+                    advance();
+                    
+                    if (current.type == TokenType.COMMA)
+                        advance();
+                }
+                
+                var err = expect(TokenType.RIGHT_SQUARE);
+                if (err != null)
+                    return Err(err);
+            }
+            
+            uses = {
+                module: usesName,
+                imports: imports
+            };
         }
         
         err = expect(TokenType.KEYWORD, "do");
@@ -848,7 +875,7 @@ class Parser
         if (err != null)
             return Err(err);
             
-        var uses:Null<String> = null;
+        var uses:Null<UsesDecl> = null;
         if (current.type == TokenType.KEYWORD && current.value == "uses")
         {
             advance();

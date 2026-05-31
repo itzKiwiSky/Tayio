@@ -12,7 +12,7 @@ enum Value
     BoolVal(v:Bool);
     NullVal;
     ArrayVal(v:Array<Value>);
-    FuncVal(params:Array<String>, uses:Null<String>, body:Array<Node>, env:Environment);
+    FuncVal(params:Array<String>, uses:Null<pine.parser.Node.UsesDecl>, body:Array<pine.parser.Node>, env:Environment);
     DictVal(entries:Map<String, Value>);
     NativeFuncVal(func:Array<Value>->RuntimeResult);
 }

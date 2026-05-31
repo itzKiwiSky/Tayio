@@ -2,6 +2,12 @@ package pine.parser;
 
 import pine.lexer.Token;
 
+typedef UsesDecl =
+{
+    module:String,
+    imports:Null<Array<String>>
+}
+
 enum Node
 {
     // literais
@@ -31,7 +37,8 @@ enum Node
     ForInNode(varName:String, iterable:Node, body:Array<Node>);
     
     // funções
-    FuncDeclNode(name:String, params:Array<String>, uses:Null<String>, body:Array<Node>);
+    FuncDeclNode(name:String, params:Array<String>, uses:Null<UsesDecl>, body:Array<Node>);
+    FuncExprNode(params:Array<String>, uses:Null<UsesDecl>, body:Array<Node>);
     CallNode(name:String, args:Array<Node>);
     ReturnNode(value:Null<Node>);
     
@@ -44,8 +51,6 @@ enum Node
     ExportNode(node:Node); // node = FuncDeclNode ou VarDeclNode
     
     UseNode(module:String);
-    
-    FuncExprNode(params:Array<String>, uses:Null<String>, body:Array<Node>);
     
     FieldCallNode(target:Node, field:String, args:Array<Node>);
     
