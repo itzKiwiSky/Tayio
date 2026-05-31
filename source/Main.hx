@@ -29,6 +29,7 @@ class Main
                 Sys.println('File "$path" not found');
                 Sys.exit(1);
             }
+            Runtime.currentFile = path;
             var source:String = sys.io.File.getContent(path);
             run(source);
         }
@@ -47,7 +48,6 @@ class Main
     
     static function run(code:String)
     {
-        code = StringTools.replace(code, "\r\n", "\n");
         switch (Lexer.lex(code))
         {
             case Ok(tokens):

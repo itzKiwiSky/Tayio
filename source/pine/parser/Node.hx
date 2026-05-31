@@ -40,6 +40,9 @@ enum Node
     
     BlockNode(statements:Array<Node>);
     
+    ModuleNode(name:String);
+    ExportNode(node:Node); // node = FuncDeclNode ou VarDeclNode
+    
     UseNode(module:String);
     
     FuncExprNode(params:Array<String>, uses:Null<String>, body:Array<Node>);

@@ -3,11 +3,20 @@ package pine.runtime;
 class Environment
 {
     var variables:Map<String, Value> = [];
+    
     var parent:Null<Environment>;
+    
+    public var exports:Array<String> = [];
     
     public function new(?parent:Environment)
     {
         this.parent = parent;
+    }
+    
+    public function markExport(name:String):Void
+    {
+        if (!exports.contains(name))
+            exports.push(name);
     }
     
     public function getVar(name:String):Null<Value>

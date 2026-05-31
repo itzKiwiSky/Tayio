@@ -101,13 +101,49 @@ class Parser
             return Ok(ContinueNode);
         }
         
+        // module terminal
+        if (current.type == TokenType.KEYWORD && current.value == "module")
+        {
+            advance();
+            if (current.type != TokenType.IDENTIFIER)
+                return Err(new LangError(null, null, InvalidSyntax, 'Expected module name'));
+            var name = current.value;
+            advance();
+            return Ok(ModuleNode(name));
+        }
+        
+        // export func ... ou export local ...
+        if (current.type == TokenType.KEYWORD && current.value == "export")
+        {
+            advance();
+            switch (parseStatement())
+            {
+                case Ok(node):
+                    return Ok(ExportNode(node));
+                case other:
+                    return other;
+            }
+        }
+        
         if (current.type == TokenType.KEYWORD && current.value == "use")
         {
             advance(); // consome "use"
             if (current.type != TokenType.IDENTIFIER)
                 return Err(new LangError(null, null, InvalidSyntax, 'Expected module name after "use"'));
+                
             var name = current.value;
             advance();
+            
+            // acumula segmentos: std.io
+            while (current.type == TokenType.DOT)
+            {
+                advance(); // consome "."
+                if (current.type != TokenType.IDENTIFIER)
+                    return Err(new LangError(null, null, InvalidSyntax, 'Expected identifier after "." in module name'));
+                name += "." + current.value;
+                advance();
+            }
+            
             return Ok(UseNode(name));
         }
         

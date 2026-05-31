@@ -1,0 +1,5 @@
+module hello
+
+export func greet() uses pine.std do
+    print("Hello!!")
+end

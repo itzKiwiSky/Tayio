@@ -1,5 +1,7 @@
 package pine.runtime;
 
+import pine.parser.Parser;
+import pine.lexer.Lexer;
 import pine.runtime.packages.Stdlib;
 import pine.lexer.Token;
 import pine.parser.Node;
@@ -21,12 +23,32 @@ enum RuntimeResult
 
 class Runtime
 {
+    public static var currentFile:String = "";
     static var globalEnv:Environment = new Environment();
     static var _nativeModules:Map<String, Map<String, Value>> = [];
     
     public static inline function addNativeModule(mod:INativeModule):Void
         _nativeModules.set(mod.modname, mod.getModule());
         
+    static function resolveModulePath(module:String):Null<String>
+    {
+        // pega o diretório do arquivo atual
+        var baseDir = haxe.io.Path.directory(Runtime.currentFile);
+        var relative = module.split(".").join("/");
+        
+        // tenta arquivo direto
+        var filePath = haxe.io.Path.join([baseDir, relative + ".pine"]);
+        if (sys.FileSystem.exists(filePath))
+            return filePath;
+            
+        // tenta entry point de pasta
+        var dirPath = haxe.io.Path.join([baseDir, relative, "start.pine"]);
+        if (sys.FileSystem.exists(dirPath))
+            return dirPath;
+            
+        return null;
+    }
+    
     public static function run(ast:Node):RuntimeResult
     {
         addNativeModule(new Stdlib());
@@ -386,9 +408,72 @@ class Runtime
                 return Signal(SContinue);
                 
             case UseNode(module):
-                if (!_nativeModules.exists(module))
-                    return Err(new LangError(null, null, RuntimeError, 'Unknown module "$module"'));
-                globalEnv.createVar(module, DictVal(_nativeModules.get(module)));
+                // first check if is native
+                if (_nativeModules.exists(module))
+                {
+                    var alias = module.split(".").pop();
+                    globalEnv.createVar(alias, DictVal(_nativeModules.get(module)));
+                    return Ok(NullVal);
+                }
+                
+                // else try resolve the path
+                var path = resolveModulePath(module);
+                if (path == null)
+                    return Err(new LangError(null, null, RuntimeError, 'Module "$module" not found'));
+                    
+                var source = sys.io.File.getContent(path);
+                
+                var tokens = switch (Lexer.lex(source))
+                {
+                    case Ok(t): t;
+                    case Err(e): return Err(e);
+                }
+                
+                var ast = switch (Parser.parse(tokens))
+                {
+                    case Ok(n): n;
+                    case Err(e): return Err(e);
+                }
+                
+                var moduleEnv = new Environment();
+                switch (evaluate(ast, moduleEnv))
+                {
+                    case Err(e): return Err(e);
+                    case _:
+                }
+                
+                var moduleDict:Map<String, Value> = [];
+                for (name in moduleEnv.exports)
+                {
+                    var v = moduleEnv.getVar(name);
+                    if (v != null)
+                        moduleDict.set(name, v);
+                }
+                
+                var alias = module.split(".").pop();
+                globalEnv.createVar(alias, DictVal(moduleDict));
+                return Ok(NullVal);
+                
+            case ModuleNode(name):
+                // register the mod name for now
+                return Ok(NullVal);
+                
+            case ExportNode(node):
+                // mark and execute as exported
+                switch (evaluate(node, env))
+                {
+                    case Ok(_):
+                    case other: return other;
+                }
+                
+                switch (node)
+                {
+                    case FuncDeclNode(name, _, _, _):
+                        env.markExport(name);
+                    case VarDeclNode(_, name, _):
+                        env.markExport(name);
+                    case _:
+                }
                 return Ok(NullVal);
                 
             case _:

@@ -2,7 +2,7 @@ package pine.runtime.packages;
 
 class Stdlib implements INativeModule
 {
-    public var modname:String = "std";
+    public var modname:String = "pine.std";
     
     public function new() {}
     
@@ -10,14 +10,19 @@ class Stdlib implements INativeModule
     {
         var module:Map<String, Value> = [];
         
-        var module:Map<String, Value> = [];
         module.set("print", NativeFuncVal(args ->
         {
             for (arg in args)
                 Sys.print(valueToString(arg));
             return Ok(NullVal);
         }));
-        return module;
+        
+        module.set("println", NativeFuncVal(args ->
+        {
+            for (arg in args)
+                Sys.println(valueToString(arg));
+            return Ok(NullVal);
+        }));
         
         return module;
     }

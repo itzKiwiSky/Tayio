@@ -61,7 +61,7 @@ class Lexer
         while (position.index < source.length)
         {
             currentChar = position.currentChar;
-            if (~/[ \t]/.match(currentChar))
+            if (~/[ \t\r]/.match(currentChar))
                 position.advance();
             else if (~/[;\n]/.match(currentChar))
             {
