@@ -6,7 +6,7 @@ class MathLib implements INativeModule
 {
     public function new() {}
     
-    public var modname:String = "pine.Math";
+    public var modname:String = "pine.std.math";
     
     public function getModule():Map<String, Value>
     {

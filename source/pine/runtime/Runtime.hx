@@ -6,6 +6,7 @@ import pine.lexer.Lexer;
 import pine.lexer.Token;
 import pine.parser.Node;
 import pine.lexer.LangError;
+import pine.runtime.Value;
 
 enum Signal
 {
@@ -359,6 +360,9 @@ class Runtime
                                     callEnv.createVar(k, v);
                             }
                         }
+                        
+                        for (i in 0...params.length)
+                            callEnv.createVar(params[i], evaledArgs[i]); // ← FALTA ISSO!
                         for (stmt in body)
                         {
                             switch (evaluate(stmt, callEnv))
@@ -459,7 +463,8 @@ class Runtime
                 if (_nativeModules.exists(module))
                 {
                     var alias = module.split(".").pop();
-                    globalEnv.createVar(alias, DictVal(_nativeModules.get(module)));
+                    var dict = DictVal(_nativeModules.get(module));
+                    globalEnv.createVar(alias, dict);
                     return Ok(NullVal);
                 }
                 

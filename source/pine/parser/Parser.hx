@@ -714,15 +714,21 @@ class Parser
                 if (current.type == TokenType.DOT)
                 {
                     var fieldTarget:Node = VarAccessNode(name);
-                    advance(); // consome o "."
                     
-                    var field = current.value;
-                    advance(); // consome o nome do field
-                    
-                    if (current.type == TokenType.LEFT_PAREN)
-                        return parseFieldCall(fieldTarget, field);
+                    // acumula fields encadeados: io.out.println
+                    while (current.type == TokenType.DOT)
+                    {
+                        advance(); // consome "."
+                        var field = current.value;
+                        advance(); // consome o field
                         
-                    return Ok(FieldAccessNode(fieldTarget, field));
+                        if (current.type == TokenType.LEFT_PAREN)
+                            return parseFieldCall(fieldTarget, field);
+                            
+                        fieldTarget = FieldAccessNode(fieldTarget, field);
+                    }
+                    
+                    return Ok(fieldTarget);
                 }
                 
                 // assignment: x = ...

@@ -2,7 +2,7 @@ package pine.runtime.packages.std.io;
 
 class Stdout implements INativeModule
 {
-    public var modname:String = "pine.std.io.out";
+    public var modname:String = "out";
     
     public function new() {}
     

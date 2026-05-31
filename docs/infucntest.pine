@@ -1,8 +1,8 @@
-use pine.std
+use pine.std.io
 
-func main() do
+func main() uses pine.std.io do
     exec(func() do
-        std.println("Hello")
+        out.println("Hello")
     end)
 end
 
