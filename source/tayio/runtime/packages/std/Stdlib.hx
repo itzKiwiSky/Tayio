@@ -1,6 +1,6 @@
 package tayio.runtime.packages.std;
 
-import tayio.runtime.packages.std.io.Stdio;
+import tayio.runtime.packages.std.Stdio;
 import tayio.runtime.packages.std.Mathlib;
 
 class StdLib extends NativeNamespace

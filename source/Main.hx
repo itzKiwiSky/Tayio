@@ -28,6 +28,9 @@ class Main
         }
         else
         {
+            if (args[1] == "--debug" || args[1] == "-d")
+                machine.isDebug = true;
+                
             var path = args[0];
             if (!sys.FileSystem.exists(path))
             {

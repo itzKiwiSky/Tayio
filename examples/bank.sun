@@ -1,0 +1,19 @@
+use tayio.std.io
+
+global user = ""
+global password = ""
+
+func createUser() do
+    local userData = {
+        user = "name" 
+    }
+    local a = [ 
+        1, 2
+        3, 4,
+    ]
+    return userData
+end
+
+func main() do
+    println(createUser())
+end

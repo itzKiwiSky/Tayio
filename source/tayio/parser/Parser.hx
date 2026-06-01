@@ -802,15 +802,19 @@ class Parser
         
         while (current.type != TokenType.RIGHT_SQUARE)
         {
-            switch (parseExpression())
+            while (current.type != TokenType.NEWLINE)
             {
-                case Ok(n):
-                    elements.push(n);
-                case Err(e):
-                    return Err(e);
+                switch (parseExpression())
+                {
+                    case Ok(n):
+                        elements.push(n);
+                    case Err(e):
+                        return Err(e);
+                }
+                if (current.type == TokenType.COMMA)
+                    advance();
             }
-            if (current.type == TokenType.COMMA)
-                advance();
+            advance();
         }
         
         var err = expect(TokenType.RIGHT_SQUARE);
@@ -827,32 +831,35 @@ class Parser
         
         while (current.type != TokenType.RIGHT_BRACE)
         {
-            if (current.type != TokenType.IDENTIFIER)
-                return Err(new LangError(null, null, InvalidSyntax, 'Expected key name in dict'));
-                
-            var key = current.value;
-            advance(); // consome a chave
-            
-            var err = expect(TokenType.ASSIGN);
-            if (err != null)
-                return Err(err);
-                
-            switch (parseExpression())
+            while (current.type != TokenType.NEWLINE)
             {
-                case Ok(val):
-                    entries.push({key: key, value: val});
-                case other:
-                    return other;
+                if (current.type != TokenType.IDENTIFIER)
+                    return Err(new LangError(null, null, InvalidSyntax, 'Expected key name in dict'));
+                    
+                var key = current.value;
+                advance(); // consome a chave
+                
+                var err = expect(TokenType.ASSIGN);
+                if (err != null)
+                    return Err(err);
+                    
+                switch (parseExpression())
+                {
+                    case Ok(val):
+                        entries.push({key: key, value: val});
+                    case other:
+                        return other;
+                }
+                
+                if (current.type == TokenType.COMMA)
+                    advance();
             }
-            
-            if (current.type == TokenType.COMMA)
-                advance();
+            advance();
         }
         
         var err = expect(TokenType.RIGHT_BRACE);
         if (err != null)
             return Err(err);
-            
         return Ok(DictNode(entries));
     }
     

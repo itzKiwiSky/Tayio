@@ -1,12 +1,12 @@
-package tayio.runtime.packages.std.io;
+package tayio.runtime.packages.std;
 
 import tayio.runtime.INativePackage.IPackage;
 
-class Stdout implements IPackage
+class Stdio implements IPackage
 {
     public function new() {}
     
-    public function getModule():Map<String, Value>
+    public function getModule()
     {
         var module:Map<String, Value> = [];
         
