@@ -85,14 +85,23 @@ class Runtime
         var baseDir = haxe.io.Path.directory(currentFile);
         var relative = module.split(".").join("/");
         
-        var filePath = haxe.io.Path.join([baseDir, relative + ".tayio"]);
-        if (sys.FileSystem.exists(filePath))
-            return filePath;
+        var extensions:Array<String> = [".tyo", ".sun"];
+        
+        for (ext in extensions)
+        {
+            // arquivo direto
+            var filePath = haxe.io.Path.join([baseDir, relative + ext]);
             
-        var dirPath = haxe.io.Path.join([baseDir, relative, "start.tayio"]);
-        if (sys.FileSystem.exists(dirPath))
-            return dirPath;
+            if (sys.FileSystem.exists(filePath) && !sys.FileSystem.isDirectory(filePath))
+                return filePath;
+                
+            // index dentro da pasta
+            var indexPath = haxe.io.Path.join([baseDir, relative, "index" + ext]);
             
+            if (sys.FileSystem.exists(indexPath) && !sys.FileSystem.isDirectory(indexPath))
+                return indexPath;
+        }
+        
         return null;
     }
     

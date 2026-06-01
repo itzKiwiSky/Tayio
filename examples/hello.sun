@@ -1,0 +1,5 @@
+module hello
+
+export func greet() uses tayio.std.io do
+    out.print("Hello!!")
+end
