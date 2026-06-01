@@ -1,8 +1,10 @@
 package pine.runtime;
 
+import pine.runtime.Runtime;
 import pine.parser.Node;
 import pine.runtime.Runtime.RuntimeResult;
 import pine.runtime.Environment;
+import pine.parser.Node;
 
 enum Value
 {
@@ -12,7 +14,7 @@ enum Value
     BoolVal(v:Bool);
     NullVal;
     ArrayVal(v:Array<Value>);
-    FuncVal(params:Array<String>, uses:Null<pine.parser.Node.UsesDecl>, body:Array<pine.parser.Node>, env:Environment);
+    FuncVal(params:Array<String>, uses:Null<UsesDecl>, body:Array<Node>, env:Environment);
     DictVal(entries:Map<String, Value>);
     NativeFuncVal(func:Array<Value>->RuntimeResult);
 }

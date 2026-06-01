@@ -1,5 +1,6 @@
 package pine.runtime;
 
+import pine.PineEntry;
 import pine.runtime.INativePackage.INativeModule;
 import pine.runtime.packages.std.Stdlib.StdLib;
 import pine.parser.Parser;
@@ -33,6 +34,47 @@ class Runtime
     public static inline function addNativeModule(mod:INativeModule):Void
         _nativeModules.set(mod.modname, mod.getModule());
         
+    public static function get(name:String):Null<Value>
+    {
+        return globalEnv.getVar(name);
+    }
+    
+    public static function getInt(name:String):Null<Int>
+    {
+        return switch (globalEnv.getVar(name))
+        {
+            case IntVal(v): v;
+            case _: null;
+        }
+    }
+    
+    public static function getFloat(name:String):Null<Float>
+    {
+        return switch (globalEnv.getVar(name))
+        {
+            case FloatVal(v): v;
+            case _: null;
+        }
+    }
+    
+    public static function getBool(name:String):Null<Bool>
+    {
+        return switch (globalEnv.getVar(name))
+        {
+            case BoolVal(v): v;
+            case _: null;
+        }
+    }
+    
+    public static function getString(name:String):Null<String>
+    {
+        return switch (globalEnv.getVar(name))
+        {
+            case StringVal(v): v;
+            case _: null;
+        }
+    }
+    
     static function resolveModulePath(module:String):Null<String>
     {
         var baseDir = haxe.io.Path.directory(currentFile);
@@ -47,6 +89,49 @@ class Runtime
             return dirPath;
             
         return null;
+    }
+    
+    public static function set(name:String, value:Value):Void
+    {
+        if (globalEnv.getVar(name) != null)
+            globalEnv.assign(name, value);
+        else
+            globalEnv.createVar(name, value);
+    }
+    
+    // sugars
+    public static function setInt(name:String, v:Int):Void
+        set(name, IntVal(v));
+        
+    public static function setFloat(name:String, v:Float):Void
+        set(name, FloatVal(v));
+        
+    public static function setString(name:String, v:String):Void
+        set(name, StringVal(v));
+        
+    public static function setBool(name:String, v:Bool):Void
+        set(name, BoolVal(v));
+        
+    public static function register(name:String, func:Array<Value>->RuntimeResult):Void
+    {
+        globalEnv.createVar(name, NativeFuncVal(func));
+    }
+    
+    public static function call(name:String, args:Array<Value>):RuntimeResult
+    {
+        var funcDec = globalEnv.getVar(name);
+        if (funcDec == null)
+            return Err(new LangError(null, null, RuntimeError, 'Function "$name" is not defined'));
+            
+        switch (funcDec)
+        {
+            case FuncVal(params, uses, body, funcEnv):
+                return callFunc(params, uses, body, funcEnv, args);
+            case NativeFuncVal(func):
+                return func(args);
+            case _:
+                return Err(new LangError(null, null, RuntimeError, '"$name" is not a function'));
+        }
     }
     
     // resolve o Map de um módulo — direto ou navegando pelo pai
