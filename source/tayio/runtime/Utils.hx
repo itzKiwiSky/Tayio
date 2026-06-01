@@ -1,6 +1,6 @@
-package pine.runtime;
+package tayio.runtime;
 
-import pine.lexer.LangError;
+import tayio.lexer.LangError;
 
 class Utils
 {

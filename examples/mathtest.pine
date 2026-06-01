@@ -1,5 +1,5 @@
-use pine.std.io
-use pine.std.math
+use tayio.std.io
+use tayio.std.math
 
 func main() do
     out.println(floor(2.43))

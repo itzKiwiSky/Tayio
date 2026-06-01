@@ -1,4 +1,4 @@
-use pine.std
+use tayio.std
 
 func main() do
     std.println("Fibonacci with 11")

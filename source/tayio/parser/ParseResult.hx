@@ -1,6 +1,6 @@
-package pine.parser;
+package tayio.parser;
 
-import pine.lexer.LangError;
+import tayio.lexer.LangError;
 
 enum ParseResult
 {

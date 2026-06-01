@@ -1,4 +1,4 @@
-package pine.runtime.packages.std.io;
+package tayio.runtime.packages.std.io;
 
 class Stdio extends NativeNamespace
 {

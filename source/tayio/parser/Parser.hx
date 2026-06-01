@@ -1,9 +1,9 @@
-package pine.parser;
+package tayio.parser;
 
-import pine.parser.Node.UsesDecl;
-import pine.lexer.Token;
-import pine.lexer.Token.TokenType;
-import pine.lexer.LangError;
+import tayio.parser.Node.UsesDecl;
+import tayio.lexer.Token;
+import tayio.lexer.Token.TokenType;
+import tayio.lexer.LangError;
 
 class Parser
 {
@@ -226,7 +226,7 @@ class Parser
             var usesName = current.value;
             advance();
             
-            // acumula segmentos: pine.std.io
+            // acumula segmentos: tayio.std.io
             while (current.type == TokenType.DOT)
             {
                 advance(); // eat "."

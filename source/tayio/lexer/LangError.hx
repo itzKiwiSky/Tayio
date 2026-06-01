@@ -1,4 +1,4 @@
-package pine.lexer;
+package tayio.lexer;
 
 enum ErrorType
 {

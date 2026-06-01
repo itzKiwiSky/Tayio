@@ -1,25 +1,35 @@
-package pine;
+package tayio;
 
-import pine.runtime.Runtime;
-import pine.parser.Parser;
-import pine.lexer.Lexer;
+import tayio.runtime.Runtime;
+import tayio.parser.Parser;
+import tayio.lexer.Lexer;
 
-class PineEntry
+class TayioMachine
 {
-    public static var isDebug:Bool = false;
+    public var isDebug:Bool = false;
+    public var autoInitRuntime:Bool = true;
     
-    public static function setFilename(fn:String)
+    public var runtime:Runtime;
+    
+    public function new()
     {
-        Runtime.currentFile = fn;
+        this.isDebug = false;
+        this.autoInitRuntime = true;
+        runtime = new Runtime();
     }
     
-    public static function setIn(fn:String)
-    {
+    public inline function setFilename(fn:String)
+        runtime.currentFile = fn;
+        
+    public inline function setIn(fn:String)
         Lexer.filename = fn;
-    }
-    
-    public static function run(code:String)
+        
+    public function run(code:String)
     {
+        // static runtime initialization //
+        if (autoInitRuntime)
+            runtime.init();
+            
         switch (Lexer.lex(code))
         {
             case Ok(tokens):
@@ -39,7 +49,7 @@ class PineEntry
                             Sys.println("AST generated with sucess!");
                             Sys.println(ast); // printa a árvore
                         }
-                        switch (Runtime.run(ast))
+                        switch (runtime.run(ast))
                         {
                             case Ok(value):
                                 if (isDebug) Sys.println(value);
@@ -48,7 +58,7 @@ class PineEntry
                                 Sys.println(error.asString());
                                 
                             case Signal(signal):
-                                Sys.println('Signal triggered $signal');
+                                if (isDebug) Sys.println('Signal triggered $signal');
                         }
                         
                     case Err(error):

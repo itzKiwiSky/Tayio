@@ -1,6 +1,6 @@
-package pine.parser;
+package tayio.parser;
 
-import pine.lexer.Token;
+import tayio.lexer.Token;
 
 typedef UsesDecl =
 {

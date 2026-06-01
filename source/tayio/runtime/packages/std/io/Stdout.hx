@@ -1,6 +1,6 @@
-package pine.runtime.packages.std.io;
+package tayio.runtime.packages.std.io;
 
-import pine.runtime.INativePackage.IPackage;
+import tayio.runtime.INativePackage.IPackage;
 
 class Stdout implements IPackage
 {

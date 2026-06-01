@@ -1,12 +1,19 @@
 package;
 
-import pine.PineEntry;
+import tayio.TaiyoMachine;
 
 class TestClass
 {
+    static var machine:TayioMachine;
+    
     public static function test()
     {
-        var code:String = 'use pine.std.io\nfunc main() do out.println("hello") end';
-        PineEntry.run(code);
+        machine = new TayioMachine();
+        
+        var code:String = 'use tayio.std.io\nfunc test() do out.println("hello test") end';
+        machine.autoInitRuntime = false;
+        machine.runtime.init();
+        machine.run(code);
+        machine.runtime.call("test", []);
     }
 }

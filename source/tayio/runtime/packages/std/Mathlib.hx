@@ -1,7 +1,7 @@
-package pine.runtime.packages.std;
+package tayio.runtime.packages.std;
 
-import pine.runtime.INativePackage.IPackage;
-import pine.lexer.LangError;
+import tayio.runtime.INativePackage.IPackage;
+import tayio.lexer.LangError;
 
 class MathLib implements IPackage
 {

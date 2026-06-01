@@ -1,4 +1,4 @@
-use pine.std.io
+use tayio.std.io
 
 
 func main() do

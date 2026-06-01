@@ -1,7 +1,7 @@
 package test.specs;
 
-import pine.lexer.Lexer;
-import pine.lexer.Token;
+import tayio.lexer.Lexer;
+import tayio.lexer.Token;
 
 class Main
 {

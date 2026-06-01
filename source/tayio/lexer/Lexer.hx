@@ -1,7 +1,7 @@
-package pine.lexer;
+package tayio.lexer;
 
-import pine.lexer.Token.TokenType;
-import pine.lexer.LangError;
+import tayio.lexer.Token.TokenType;
+import tayio.lexer.LangError;
 import haxe.Exception;
 
 using StringTools;

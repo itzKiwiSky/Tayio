@@ -1,4 +1,4 @@
 
-func main() uses pine.std.io do
-    out.print("Hello from pine")
+func main() uses tayio.std.io do
+    out.print("Hello from tayio")
 end

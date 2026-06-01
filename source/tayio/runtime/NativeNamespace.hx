@@ -1,7 +1,7 @@
-package pine.runtime;
+package tayio.runtime;
 
-import pine.runtime.INativePackage.INativeModule;
-import pine.runtime.INativePackage.IPackage;
+import tayio.runtime.INativePackage.INativeModule;
+import tayio.runtime.INativePackage.IPackage;
 
 class NativeNamespace implements INativeModule
 {

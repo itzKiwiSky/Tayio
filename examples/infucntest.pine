@@ -1,6 +1,6 @@
-use pine.std.io
+use tayio.std.io
 
-func main() uses pine.std.io do
+func main() uses tayio.std.io do
     exec(func() do
         out.println("Hello")
     end)

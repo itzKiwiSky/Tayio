@@ -1,15 +1,14 @@
-package pine.runtime;
+package tayio.runtime;
 
-import pine.PineEntry;
-import pine.runtime.INativePackage.INativeModule;
-import pine.runtime.packages.std.Stdlib.StdLib;
-import pine.parser.Parser;
-import pine.lexer.Lexer;
-import pine.lexer.Token;
-import pine.parser.Node;
-import pine.parser.Node.UsesDecl;
-import pine.lexer.LangError;
-import pine.runtime.Value;
+import tayio.runtime.INativePackage.INativeModule;
+import tayio.runtime.packages.std.Stdlib.StdLib;
+import tayio.parser.Parser;
+import tayio.lexer.Lexer;
+import tayio.lexer.Token;
+import tayio.parser.Node;
+import tayio.parser.Node.UsesDecl;
+import tayio.lexer.LangError;
+import tayio.runtime.Value;
 
 enum Signal
 {
@@ -27,19 +26,25 @@ enum RuntimeResult
 
 class Runtime
 {
-    public static var currentFile:String = "";
-    static var globalEnv:Environment = new Environment();
-    static var _nativeModules:Map<String, Map<String, Value>> = [];
+    public var currentFile:String = "";
     
-    public static inline function addNativeModule(mod:INativeModule):Void
-        _nativeModules.set(mod.modname, mod.getModule());
-        
-    public static function get(name:String):Null<Value>
+    var globalEnv:Environment;
+    var _nativeModules:Map<String, Map<String, Value>>;
+    
+    public function new()
     {
-        return globalEnv.getVar(name);
+        this.currentFile = "";
+        this.globalEnv = new Environment();
+        this._nativeModules = new Map<String, Map<String, Value>>();
     }
     
-    public static function getInt(name:String):Null<Int>
+    public inline function addNativeModule(mod:INativeModule):Void
+        _nativeModules.set(mod.modname, mod.getModule());
+        
+    public inline function get(name:String):Null<Value>
+        return globalEnv.getVar(name);
+        
+    public function getInt(name:String):Null<Int>
     {
         return switch (globalEnv.getVar(name))
         {
@@ -48,7 +53,7 @@ class Runtime
         }
     }
     
-    public static function getFloat(name:String):Null<Float>
+    public function getFloat(name:String):Null<Float>
     {
         return switch (globalEnv.getVar(name))
         {
@@ -57,7 +62,7 @@ class Runtime
         }
     }
     
-    public static function getBool(name:String):Null<Bool>
+    public function getBool(name:String):Null<Bool>
     {
         return switch (globalEnv.getVar(name))
         {
@@ -66,7 +71,7 @@ class Runtime
         }
     }
     
-    public static function getString(name:String):Null<String>
+    public function getString(name:String):Null<String>
     {
         return switch (globalEnv.getVar(name))
         {
@@ -75,23 +80,23 @@ class Runtime
         }
     }
     
-    static function resolveModulePath(module:String):Null<String>
+    function resolveModulePath(module:String):Null<String>
     {
         var baseDir = haxe.io.Path.directory(currentFile);
         var relative = module.split(".").join("/");
         
-        var filePath = haxe.io.Path.join([baseDir, relative + ".pine"]);
+        var filePath = haxe.io.Path.join([baseDir, relative + ".tayio"]);
         if (sys.FileSystem.exists(filePath))
             return filePath;
             
-        var dirPath = haxe.io.Path.join([baseDir, relative, "start.pine"]);
+        var dirPath = haxe.io.Path.join([baseDir, relative, "start.tayio"]);
         if (sys.FileSystem.exists(dirPath))
             return dirPath;
             
         return null;
     }
     
-    public static function set(name:String, value:Value):Void
+    public function set(name:String, value:Value):Void
     {
         if (globalEnv.getVar(name) != null)
             globalEnv.assign(name, value);
@@ -100,24 +105,22 @@ class Runtime
     }
     
     // sugars
-    public static function setInt(name:String, v:Int):Void
+    public inline function setInt(name:String, v:Int):Void
         set(name, IntVal(v));
         
-    public static function setFloat(name:String, v:Float):Void
+    public inline function setFloat(name:String, v:Float):Void
         set(name, FloatVal(v));
         
-    public static function setString(name:String, v:String):Void
+    public inline function setString(name:String, v:String):Void
         set(name, StringVal(v));
         
-    public static function setBool(name:String, v:Bool):Void
+    public inline function setBool(name:String, v:Bool):Void
         set(name, BoolVal(v));
         
-    public static function register(name:String, func:Array<Value>->RuntimeResult):Void
-    {
+    public inline function register(name:String, func:Array<Value>->RuntimeResult):Void
         globalEnv.createVar(name, NativeFuncVal(func));
-    }
-    
-    public static function call(name:String, args:Array<Value>):RuntimeResult
+        
+    public function call(name:String, args:Array<Value>):RuntimeResult
     {
         var funcDec = globalEnv.getVar(name);
         if (funcDec == null)
@@ -134,8 +137,7 @@ class Runtime
         }
     }
     
-    // resolve o Map de um módulo — direto ou navegando pelo pai
-    static function resolveNativeModule(moduleName:String):Null<Map<String, Value>>
+    function resolveNativeModule(moduleName:String):Null<Map<String, Value>>
     {
         if (_nativeModules.exists(moduleName))
             return _nativeModules.get(moduleName);
@@ -161,7 +163,7 @@ class Runtime
     }
     
     // injeta módulo no callEnv conforme UsesDecl
-    static function injectUses(uses:UsesDecl, callEnv:Environment):Void
+    function injectUses(uses:UsesDecl, callEnv:Environment):Void
     {
         var moduleDict = resolveNativeModule(uses.module);
         if (moduleDict == null)
@@ -191,7 +193,7 @@ class Runtime
     }
     
     // executa uma FuncVal com args já avaliados
-    static function callFunc(params:Array<String>, uses:Null<UsesDecl>, body:Array<Node>, funcEnv:Environment, evaledArgs:Array<Value>):RuntimeResult
+    function callFunc(params:Array<String>, uses:Null<UsesDecl>, body:Array<Node>, funcEnv:Environment, evaledArgs:Array<Value>):RuntimeResult
     {
         var callEnv = new Environment(funcEnv);
         if (uses != null)
@@ -212,9 +214,15 @@ class Runtime
         return Ok(NullVal);
     }
     
-    public static function run(ast:Node):RuntimeResult
+    public function init()
     {
-        // reseta estado entre chamadas
+        globalEnv = new Environment();
+        _nativeModules = [];
+        addNativeModule(new StdLib());
+    }
+    
+    public function run(ast:Node):RuntimeResult
+    {
         globalEnv = new Environment();
         _nativeModules = [];
         addNativeModule(new StdLib());
@@ -226,9 +234,10 @@ class Runtime
             case _:
         }
         
+        // main é opcional — se existir chama, senão retorna Ok
         var mainFunc = globalEnv.getVar("main");
         if (mainFunc == null)
-            return Err(new LangError(null, null, RuntimeError, 'No "main" function defined'));
+            return Ok(NullVal);
             
         switch (mainFunc)
         {
@@ -239,7 +248,7 @@ class Runtime
         }
     }
     
-    static function evaluate(node:Node, env:Environment):RuntimeResult
+    function evaluate(node:Node, env:Environment):RuntimeResult
     {
         switch (node)
         {
@@ -519,7 +528,7 @@ class Runtime
                     return Ok(NullVal);
                 }
                 
-                // 2. navega pelo pai (pine.std.io → pine.std["io"] → injeta out/in)
+                // 2. navega pelo pai (tayio.std.io → tayio.std["io"] → injeta out/in)
                 var parts = module.split(".");
                 var fieldName = parts[parts.length - 1];
                 var parent = parts.slice(0, parts.length - 1).join(".");
@@ -598,7 +607,7 @@ class Runtime
         }
     }
     
-    static function applyBinOp(left:Value, op:Token, right:Value):RuntimeResult
+    function applyBinOp(left:Value, op:Token, right:Value):RuntimeResult
     {
         switch (op.type)
         {
@@ -727,7 +736,7 @@ class Runtime
         return Ok(NullVal);
     }
     
-    static function applyUnary(op:Token, value:Value):RuntimeResult
+    function applyUnary(op:Token, value:Value):RuntimeResult
     {
         switch (op.type)
         {
@@ -749,14 +758,14 @@ class Runtime
         }
     }
     
-    static function isTruthy(value:Value):Bool
+    function isTruthy(value:Value):Bool
         return switch (value)
         {
             case BoolVal(v): v;
             case _: false;
         }
         
-    static function executeBlock(body:Array<Node>, env:Environment):RuntimeResult
+    function executeBlock(body:Array<Node>, env:Environment):RuntimeResult
     {
         var last:Value = NullVal;
         for (stmt in body)
