@@ -1,6 +1,6 @@
-package tayio.parser;
+package taiyo.parser;
 
-import tayio.lexer.LangError;
+import taiyo.lexer.LangError;
 
 enum ParseResult
 {

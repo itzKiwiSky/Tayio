@@ -1,4 +1,4 @@
-package tayio.lexer;
+package taiyo.lexer;
 
 enum ErrorType
 {

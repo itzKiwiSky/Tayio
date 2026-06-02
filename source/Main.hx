@@ -1,15 +1,15 @@
-import tayio.TaiyoMachine;
+import taiyo.TaiyoMachine;
 
 class Main
 {
     static var isDebug:Bool = false;
-    static var machine:TayioMachine;
+    static var machine:TaiyoMachine;
     
     static function main()
     {
         var args:Array<String> = Sys.args();
         
-        machine = new TayioMachine();
+        machine = new TaiyoMachine();
         
         if (args[0] == "repl")
         {
@@ -46,7 +46,7 @@ class Main
     
     static function replMode()
     {
-        Sys.println("tayio REPL");
+        Sys.println("taiyo REPL");
         while (true)
         {
             Sys.print("|> ");

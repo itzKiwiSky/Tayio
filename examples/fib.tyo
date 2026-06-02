@@ -1,4 +1,4 @@
-use tayio.std
+use taiyo.std
 
 func main() do
     std.println("Fibonacci with 11")

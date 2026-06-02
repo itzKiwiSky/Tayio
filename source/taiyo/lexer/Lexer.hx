@@ -1,7 +1,7 @@
-package tayio.lexer;
+package taiyo.lexer;
 
-import tayio.lexer.Token.TokenType;
-import tayio.lexer.LangError;
+import taiyo.lexer.Token.TokenType;
+import taiyo.lexer.LangError;
 import haxe.Exception;
 
 using StringTools;

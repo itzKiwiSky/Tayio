@@ -1,16 +1,16 @@
 package;
 
-import tayio.TaiyoMachine;
+import taiyo.TaiyoMachine;
 
 class TestClass
 {
-    static var machine:TayioMachine;
+    static var machine:TaiyoMachine;
     
     public static function test()
     {
-        machine = new TayioMachine();
+        machine = new TaiyoMachine();
         
-        var code:String = 'use tayio.std.io\nfunc test() do out.println("hello test") end';
+        var code:String = 'use taiyo.std.io\nfunc test() do out.println("hello test") end';
         machine.autoInitRuntime = false;
         machine.runtime.init();
         machine.run(code);

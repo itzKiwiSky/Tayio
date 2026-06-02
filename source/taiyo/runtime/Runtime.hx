@@ -1,14 +1,14 @@
-package tayio.runtime;
+package taiyo.runtime;
 
-import tayio.runtime.INativePackage.INativeModule;
-import tayio.runtime.packages.std.Stdlib.StdLib;
-import tayio.parser.Parser;
-import tayio.lexer.Lexer;
-import tayio.lexer.Token;
-import tayio.parser.Node;
-import tayio.parser.Node.UsesDecl;
-import tayio.lexer.LangError;
-import tayio.runtime.Value;
+import taiyo.runtime.INativePackage.INativeModule;
+import taiyo.runtime.packages.std.Stdlib.StdLib;
+import taiyo.parser.Parser;
+import taiyo.lexer.Lexer;
+import taiyo.lexer.Token;
+import taiyo.parser.Node;
+import taiyo.parser.Node.UsesDecl;
+import taiyo.lexer.LangError;
+import taiyo.runtime.Value;
 
 enum Signal
 {
@@ -537,7 +537,7 @@ class Runtime
                     return Ok(NullVal);
                 }
                 
-                // 2. navega pelo pai (tayio.std.io → tayio.std["io"] → injeta out/in)
+                // 2. navega pelo pai (taiyo.std.io → taiyo.std["io"] → injeta out/in)
                 var parts = module.split(".");
                 var fieldName = parts[parts.length - 1];
                 var parent = parts.slice(0, parts.length - 1).join(".");

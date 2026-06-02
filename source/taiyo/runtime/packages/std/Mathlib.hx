@@ -1,7 +1,7 @@
-package tayio.runtime.packages.std;
+package taiyo.runtime.packages.std;
 
-import tayio.runtime.INativePackage.IPackage;
-import tayio.lexer.LangError;
+import taiyo.runtime.INativePackage.IPackage;
+import taiyo.lexer.LangError;
 
 class MathLib implements IPackage
 {

@@ -1,6 +1,6 @@
-use tayio.std.io
+use taiyo.std.io
 
-func main() uses tayio.std.io do
+func main() uses taiyo.std.io do
     exec(func() do
         out.println("Hello")
     end)

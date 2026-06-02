@@ -1,9 +1,9 @@
-package tayio.parser;
+package taiyo.parser;
 
-import tayio.parser.Node.UsesDecl;
-import tayio.lexer.Token;
-import tayio.lexer.Token.TokenType;
-import tayio.lexer.LangError;
+import taiyo.parser.Node.UsesDecl;
+import taiyo.lexer.Token;
+import taiyo.lexer.Token.TokenType;
+import taiyo.lexer.LangError;
 
 class Parser
 {
@@ -226,7 +226,7 @@ class Parser
             var usesName = current.value;
             advance();
             
-            // acumula segmentos: tayio.std.io
+            // acumula segmentos: taiyo.std.io
             while (current.type == TokenType.DOT)
             {
                 advance(); // eat "."

@@ -1,7 +1,7 @@
 package test.specs;
 
-import tayio.lexer.Lexer;
-import tayio.lexer.Token;
+import taiyo.lexer.Lexer;
+import taiyo.lexer.Token;
 
 class Main
 {

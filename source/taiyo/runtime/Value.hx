@@ -1,10 +1,10 @@
-package tayio.runtime;
+package taiyo.runtime;
 
-import tayio.runtime.Runtime;
-import tayio.parser.Node;
-import tayio.runtime.Runtime.RuntimeResult;
-import tayio.runtime.Environment;
-import tayio.parser.Node;
+import taiyo.runtime.Runtime;
+import taiyo.parser.Node;
+import taiyo.runtime.Runtime.RuntimeResult;
+import taiyo.runtime.Environment;
+import taiyo.parser.Node;
 
 enum Value
 {

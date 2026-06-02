@@ -1,4 +1,4 @@
-package tayio.runtime;
+package taiyo.runtime;
 
 interface IPackage
 {

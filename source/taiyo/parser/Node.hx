@@ -1,6 +1,6 @@
-package tayio.parser;
+package taiyo.parser;
 
-import tayio.lexer.Token;
+import taiyo.lexer.Token;
 
 typedef UsesDecl =
 {

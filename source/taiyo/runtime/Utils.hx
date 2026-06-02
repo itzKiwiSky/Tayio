@@ -1,6 +1,6 @@
-package tayio.runtime;
+package taiyo.runtime;
 
-import tayio.lexer.LangError;
+import taiyo.lexer.LangError;
 
 class Utils
 {

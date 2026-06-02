@@ -1,7 +1,7 @@
-package tayio.runtime;
+package taiyo.runtime;
 
-import tayio.runtime.INativePackage.INativeModule;
-import tayio.runtime.INativePackage.IPackage;
+import taiyo.runtime.INativePackage.INativeModule;
+import taiyo.runtime.INativePackage.IPackage;
 
 class NativeNamespace implements INativeModule
 {

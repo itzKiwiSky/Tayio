@@ -1,10 +1,10 @@
-package tayio;
+package taiyo;
 
-import tayio.runtime.Runtime;
-import tayio.parser.Parser;
-import tayio.lexer.Lexer;
+import taiyo.runtime.Runtime;
+import taiyo.parser.Parser;
+import taiyo.lexer.Lexer;
 
-class TayioMachine
+class TaiyoMachine
 {
     public var isDebug:Bool = false;
     public var autoInitRuntime:Bool = true;

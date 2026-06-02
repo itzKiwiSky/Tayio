@@ -1,16 +1,13 @@
-use tayio.std.io
+use taiyo.std.io
 
 global user = ""
 global password = ""
 
 func createUser() do
     local userData = {
-        user = "name" 
+        user = "name",
+
     }
-    local a = [ 
-        1, 2
-        3, 4,
-    ]
     return userData
 end
 

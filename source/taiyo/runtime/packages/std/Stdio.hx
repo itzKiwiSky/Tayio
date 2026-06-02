@@ -1,6 +1,6 @@
-package tayio.runtime.packages.std;
+package taiyo.runtime.packages.std;
 
-import tayio.runtime.INativePackage.IPackage;
+import taiyo.runtime.INativePackage.IPackage;
 
 class Stdio implements IPackage
 {

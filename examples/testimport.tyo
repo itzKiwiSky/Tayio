@@ -1,4 +1,4 @@
 
-func main() uses tayio.std.io do
-    out.print("Hello from tayio")
+func main() uses taiyo.std.io do
+    out.print("Hello from taiyo")
 end
