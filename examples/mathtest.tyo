@@ -2,5 +2,19 @@ use taiyo.std.io
 use taiyo.std.math
 
 func main() do
-    out.println(floor(2.43))
+    println(abs(2.43))
+    println(acos(2.43))
+    println(asin(2.43))
+    println(atan(2.43))
+    println(atan2(2.43, 6))
+    println(ceil(2.43))
+    println(cos(2.43))
+    println(floor(2.43))
+    println(isFinite(2.43))
+    println(log(2.43))
+    println(max(2.43, 5))
+    println(min(2.43, 1))
+    println(sin(2.43))
+    println(sqrt(2.43))
+    println(tan(2.43))
 end
