@@ -1,6 +1,7 @@
 package taiyo.runtime.packages.std;
 
 import taiyo.runtime.INativePackage.IPackage;
+import taiyo.runtime.NativeUtils;
 
 class Stdio implements IPackage
 {
@@ -13,14 +14,14 @@ class Stdio implements IPackage
         module.set("print", NativeFuncVal(args ->
         {
             for (arg in args)
-                Sys.print(Utils.valueToString(arg));
+                Sys.print(NativeUtils.valueToString(arg));
             return Ok(NullVal);
         }));
         
         module.set("println", NativeFuncVal(args ->
         {
             for (arg in args)
-                Sys.println(Utils.valueToString(arg));
+                Sys.println(NativeUtils.valueToString(arg));
             return Ok(NullVal);
         }));
         

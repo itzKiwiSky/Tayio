@@ -8,7 +8,7 @@ class StdLib extends NativeNamespace
     public function new()
     {
         super("taiyo.std");
-        add("math", new MathLib()); // add("out", new taiyo.runtime.packages.std.Mathlib());
+        add("math", new MathLib());
         add("io", new Stdio());
     }
 }
