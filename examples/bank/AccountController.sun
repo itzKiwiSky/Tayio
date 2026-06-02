@@ -1,0 +1,16 @@
+module AccountController
+
+local accounts = []
+
+export func newAccount(username, pwd) uses taiyo.std.arrayTools do
+    local account = {
+        username = username,
+        password = pwd,
+        transactions = {},
+        balance = 0,
+    }
+end 
+
+export func findAccount(name) do
+
+end

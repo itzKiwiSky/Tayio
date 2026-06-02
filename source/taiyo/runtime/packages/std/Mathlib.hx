@@ -8,22 +8,6 @@ class MathLib implements IPackage
 {
     public function new() {}
     
-    inline function toFloat(v):Null<Float>
-        return switch (v)
-        {
-            case IntVal(n): n;
-            case FloatVal(n): n;
-            case _: null;
-        };
-        
-    inline function toInt(v):Null<Float>
-        return switch (v)
-        {
-            case IntVal(n): n;
-            case FloatVal(n): n;
-            case _: null;
-        };
-        
     public function getModule():Map<String, Value>
     {
         var mod:Map<String, Value> = [];
@@ -101,8 +85,8 @@ class MathLib implements IPackage
         mod.set("atan2", NativeFuncVal(args ->
         {
             NativeUtils.expectArgs(args, "atan2", 2);
-            var y:Null<Float> = toFloat(args[0]);
-            var x:Null<Float> = toFloat(args[1]);
+            var y:Null<Float> = NativeUtils.toFloat(args[0]);
+            var x:Null<Float> = NativeUtils.toFloat(args[1]);
             if (y == null || x == null)
                 return Err(new LangError(null, null, RuntimeError, 'atan2() expects numbers'));
             return Ok(FloatVal(Math.atan2(y, x)));
@@ -144,8 +128,8 @@ class MathLib implements IPackage
         mod.set("max", NativeFuncVal(args ->
         {
             NativeUtils.expectArgs(args, "max", 2);
-            var y:Null<Float> = toFloat(args[0]);
-            var x:Null<Float> = toFloat(args[1]);
+            var y:Null<Float> = NativeUtils.toFloat(args[0]);
+            var x:Null<Float> = NativeUtils.toFloat(args[1]);
             if (y == null || x == null)
                 return Err(new LangError(null, null, RuntimeError, 'max() expects numbers'));
             return Ok(FloatVal(Math.max(y, x)));
@@ -154,8 +138,8 @@ class MathLib implements IPackage
         mod.set("min", NativeFuncVal(args ->
         {
             NativeUtils.expectArgs(args, "min", 2);
-            var y:Null<Float> = toFloat(args[0]);
-            var x:Null<Float> = toFloat(args[1]);
+            var y:Null<Float> = NativeUtils.toFloat(args[0]);
+            var x:Null<Float> = NativeUtils.toFloat(args[1]);
             if (y == null || x == null)
                 return Err(new LangError(null, null, RuntimeError, 'min() expects numbers'));
             return Ok(FloatVal(Math.min(y, x)));

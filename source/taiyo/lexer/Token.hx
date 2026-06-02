@@ -35,6 +35,7 @@ enum TokenType
     COMMA;
     DOT; // .
     DOT3; // ...
+    COLON; // :
     
     IDENTIFIER;
     KEYWORD;

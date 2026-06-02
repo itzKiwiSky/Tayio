@@ -28,6 +28,20 @@ class NativeUtils
         }
     }
     
+    public static inline function toDict(v:Value):Null<Map<String, Value>>
+        return switch (v)
+        {
+            case DictVal(d): d;
+            case _: null;
+        };
+        
+    public static inline function toValueArray(v:Value):Null<Array<Value>>
+        return switch (v)
+        {
+            case ArrayVal(items): items;
+            case _: null;
+        };
+        
     public static inline function toFloat(v:Value):Null<Float>
         return switch (v)
         {
@@ -83,5 +97,18 @@ class NativeUtils
     {
         var r = toString(v);
         return r != null ? Ok(StringVal(r)) : Err(new LangError(null, null, RuntimeError, '$fn() expects a string'));
+    }
+    
+    // RuntimeResult versions
+    public static inline function expectDict(v:Value, fn:String):RuntimeResult
+    {
+        var r = toDict(v);
+        return r != null ? Ok(DictVal(r)) : Err(new LangError(null, null, RuntimeError, '$fn() expects a dict'));
+    }
+    
+    public static inline function expectArray(v:Value, fn:String):RuntimeResult
+    {
+        var r = toValueArray(v);
+        return r != null ? Ok(ArrayVal(r)) : Err(new LangError(null, null, RuntimeError, '$fn() expects an array'));
     }
 }

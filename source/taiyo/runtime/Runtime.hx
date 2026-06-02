@@ -528,16 +528,15 @@ class Runtime
                 
             case UseNode(module):
                 // 1. nativo direto
-                // trace(_nativeModules);
                 if (_nativeModules.exists(module))
                 {
                     var alias = module.split(".").pop();
+                    // só cria o alias como DictVal, sem injetar flat
                     globalEnv.createVar(alias, DictVal(_nativeModules.get(module)));
-                    // trace(globalEnv.variables);
                     return Ok(NullVal);
                 }
                 
-                // 2. navega pelo pai (taiyo.std.io → taiyo.std["io"] → injeta out/in)
+                // 2. navega pelo pai (taiyo.std.io → taiyo.std["io"])
                 var parts = module.split(".");
                 var fieldName = parts[parts.length - 1];
                 var parent = parts.slice(0, parts.length - 1).join(".");
@@ -548,14 +547,8 @@ class Runtime
                     var field = pDict.get(fieldName);
                     if (field != null)
                     {
-                        switch (field)
-                        {
-                            case DictVal(entries):
-                                for (k => v in entries)
-                                    globalEnv.createVar(k, v);
-                            case _:
-                                globalEnv.createVar(fieldName, field);
-                        }
+                        // só cria o alias, sem injetar flat
+                        globalEnv.createVar(fieldName, field);
                         return Ok(NullVal);
                     }
                 }
@@ -738,6 +731,18 @@ class Runtime
                     case [IntVal(a), FloatVal(b)]: return Ok(BoolVal(a <= b));
                     case [FloatVal(a), IntVal(b)]: return Ok(BoolVal(a <= b));
                     case _: return Err(new LangError(null, null, RuntimeError, 'Cannot compare $left and $right'));
+                }
+            case KEYWORD if (op.value == "and"):
+                switch ([left, right])
+                {
+                    case [BoolVal(a), BoolVal(b)]: return Ok(BoolVal(a && b));
+                    case _: return Err(new LangError(null, null, RuntimeError, 'Cannot apply "and" to $left and $right'));
+                }
+            case KEYWORD if (op.value == "or"):
+                switch ([left, right])
+                {
+                    case [BoolVal(a), BoolVal(b)]: return Ok(BoolVal(a || b));
+                    case _: return Err(new LangError(null, null, RuntimeError, 'Cannot apply "or" to $left and $right'));
                 }
             case _:
                 return Err(new LangError(null, null, RuntimeError, 'Unknown operator ${op.type}'));

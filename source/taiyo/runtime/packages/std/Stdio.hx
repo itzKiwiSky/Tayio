@@ -11,6 +11,7 @@ class Stdio implements IPackage
     {
         var module:Map<String, Value> = [];
         
+        // Classic print
         module.set("print", NativeFuncVal(args ->
         {
             for (arg in args)
@@ -18,11 +19,18 @@ class Stdio implements IPackage
             return Ok(NullVal);
         }));
         
+        // same as print but with \n lol
         module.set("println", NativeFuncVal(args ->
         {
             for (arg in args)
                 Sys.println(NativeUtils.valueToString(arg));
             return Ok(NullVal);
+        }));
+        
+        // read the line and return the string
+        module.set("readln", NativeFuncVal(args ->
+        {
+            return Ok(StringVal(Sys.stdin().readLine()));
         }));
         
         return module;

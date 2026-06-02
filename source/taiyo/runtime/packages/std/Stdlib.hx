@@ -2,6 +2,8 @@ package taiyo.runtime.packages.std;
 
 import taiyo.runtime.packages.std.Stdio;
 import taiyo.runtime.packages.std.Mathlib;
+import taiyo.runtime.packages.std.TaiyoStringTools;
+import taiyo.runtime.packages.std.TaiyoArrayTools;
 
 class StdLib extends NativeNamespace
 {
@@ -10,5 +12,7 @@ class StdLib extends NativeNamespace
         super("taiyo.std");
         add("math", new MathLib());
         add("io", new Stdio());
+        add("stringTools", new TaiyoStringTools());
+        add("arrayTools", new TaiyoArrayTools());
     }
 }

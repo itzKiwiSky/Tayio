@@ -448,7 +448,7 @@ class Parser
         var varName = current.value;
         advance();
         
-        err = expect(TokenType.KEYWORD, "in");
+        err = expect(TokenType.COLON);
         if (err != null)
             return Err(err);
             
@@ -555,8 +555,35 @@ class Parser
     // segue a precedência: expr → comparison → term → factor → unary → primary
     
     static function parseExpression():ParseResult
-        return parseComparison();
+        return parseLogical();
         
+    static function parseLogical():ParseResult
+    {
+        var left:Node;
+        switch (parseComparison())
+        {
+            case Ok(n):
+                left = n;
+            case Err(e):
+                return Err(e);
+        }
+        
+        while (current.type == TokenType.KEYWORD && (current.value == "and" || current.value == "or"))
+        {
+            var op = current;
+            advance();
+            switch (parseComparison())
+            {
+                case Ok(right):
+                    left = BinOpNode(left, op, right);
+                case Err(e):
+                    return Err(e);
+            }
+        }
+        
+        return Ok(left);
+    }
+    
     static function parseComparison():ParseResult
     {
         var left:Node;
@@ -800,21 +827,26 @@ class Parser
         advance(); // eat "["
         var elements:Array<Node> = [];
         
-        while (current.type != TokenType.RIGHT_SQUARE)
+        skipNewlines();
+        
+        while (current.type != TokenType.RIGHT_SQUARE && current.type != TokenType.EOF)
         {
-            while (current.type != TokenType.NEWLINE)
+            skipNewlines();
+            
+            switch (parseExpression())
             {
-                switch (parseExpression())
-                {
-                    case Ok(n):
-                        elements.push(n);
-                    case Err(e):
-                        return Err(e);
-                }
-                if (current.type == TokenType.COMMA)
-                    advance();
+                case Ok(n):
+                    elements.push(n);
+                case Err(e):
+                    return Err(e);
             }
-            advance();
+            
+            skipNewlines();
+            
+            if (current.type == TokenType.COMMA)
+                advance();
+                
+            skipNewlines();
         }
         
         var err = expect(TokenType.RIGHT_SQUARE);
@@ -829,37 +861,42 @@ class Parser
         advance(); // consome "{"
         var entries:Array<{key:String, value:Node}> = [];
         
-        while (current.type != TokenType.RIGHT_BRACE)
+        skipNewlines();
+        
+        while (current.type != TokenType.RIGHT_BRACE && current.type != TokenType.EOF)
         {
-            while (current.type != TokenType.NEWLINE)
-            {
-                if (current.type != TokenType.IDENTIFIER)
-                    return Err(new LangError(null, null, InvalidSyntax, 'Expected key name in dict'));
-                    
-                var key = current.value;
-                advance(); // consome a chave
+            skipNewlines();
+            
+            if (current.type != TokenType.IDENTIFIER)
+                return Err(new LangError(null, null, InvalidSyntax, 'Expected key name in dict'));
                 
-                var err = expect(TokenType.ASSIGN);
-                if (err != null)
-                    return Err(err);
-                    
-                switch (parseExpression())
-                {
-                    case Ok(val):
-                        entries.push({key: key, value: val});
-                    case other:
-                        return other;
-                }
-                
-                if (current.type == TokenType.COMMA)
-                    advance();
-            }
+            var key = current.value;
             advance();
+            
+            var err = expect(TokenType.ASSIGN);
+            if (err != null)
+                return Err(err);
+                
+            switch (parseExpression())
+            {
+                case Ok(val):
+                    entries.push({key: key, value: val});
+                case other:
+                    return other;
+            }
+            
+            skipNewlines();
+            
+            if (current.type == TokenType.COMMA)
+                advance();
+                
+            skipNewlines();
         }
         
         var err = expect(TokenType.RIGHT_BRACE);
         if (err != null)
             return Err(err);
+            
         return Ok(DictNode(entries));
     }
     

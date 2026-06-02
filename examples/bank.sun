@@ -8,9 +8,11 @@ func createUser() do
         user = "name",
 
     }
-    return userData
+    return {
+        user = "name",
+    }
 end
 
 func main() do
-    println(createUser())
+    io.println(createUser())
 end

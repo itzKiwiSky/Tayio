@@ -135,6 +135,11 @@ class Lexer
                 tokens.push(new Token(TokenType.COMMA));
                 position.advance();
             }
+            else if (currentChar == ":")
+            {
+                tokens.push(new Token(TokenType.COLON));
+                position.advance();
+            }
             else if (currentChar == ".")
             {
                 var posStart = position.copy();

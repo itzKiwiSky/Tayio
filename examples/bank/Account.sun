@@ -1,0 +1,10 @@
+module account
+
+export func newAccount(username, pwd) do
+    return {
+        username = username,
+        password = pwd,
+        transactions = {},
+        balance = 0,
+    }
+end
