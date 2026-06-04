@@ -39,9 +39,23 @@ class TaiyoArrayTools implements IPackage
             return Ok(NullVal);
         }));
         
-        mod.set("add", NativeFuncVal(args ->
+        mod.set("remove", NativeFuncVal(args ->
         {
             return Ok(NullVal);
+        }));
+        
+        mod.set("len", NativeFuncVal(args ->
+        {
+            var num:Int = 0;
+            NativeUtils.expectArgs(args, "len", 1);
+            switch (args[0])
+            {
+                case ArrayVal(ar):
+                    num = ar.length;
+                case _:
+                    return Err(new LangError(null, null, RuntimeError, 'len() expects an array as first argument'));
+            }
+            return Ok(IntVal(num));
         }));
         
         return mod;

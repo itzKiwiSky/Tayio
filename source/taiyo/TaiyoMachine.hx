@@ -18,6 +18,9 @@ class TaiyoMachine
         runtime = new Runtime();
     }
     
+    public inline function dumpRuntimeNativeModules()
+        runtime.dumpNativeModules();
+        
     public inline function setFilename(fn:String)
         runtime.currentFile = fn;
         
@@ -30,6 +33,9 @@ class TaiyoMachine
         if (autoInitRuntime)
             runtime.init();
             
+        if (isDebug)
+            runtime.dumpNativeModules();
+            
         switch (Lexer.lex(code))
         {
             case Ok(tokens):
@@ -39,7 +45,7 @@ class TaiyoMachine
                     Sys.print("[\n");
                     for (tk in tokens)
                         Sys.print("    " + tk + "\n");
-                    Sys.print("[\n");
+                    Sys.print("]\n");
                 }
                 switch (Parser.parse(tokens))
                 {

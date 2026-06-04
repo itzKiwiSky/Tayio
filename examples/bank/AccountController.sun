@@ -1,16 +1,36 @@
+use taiyo.std.arrayTools
+use taiyo.std.io
+
 module AccountController
 
 local accounts = []
 
-export func newAccount(username, pwd) uses taiyo.std.arrayTools do
+export func newAccount(username, pwd) do
     local account = {
         username = username,
         password = pwd,
         transactions = {},
         balance = 0,
     }
+
+    arrayTools.add(accounts, account)
 end 
 
-export func findAccount(name) do
+export func listAccounts() do
+    if (arrayTools.len(accounts) <= 0) do
+        io.println("")
+        io.println("Sem contas registradas")
+        io.println("")
+    else
+        for (acc : accounts) do
+            io.println(acc)
+        end
+    end
+end
 
+export func findAccount(username) do
+    for (acc : accounts) do
+        return acc.username == username
+    end
+    return false
 end

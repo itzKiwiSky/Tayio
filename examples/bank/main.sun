@@ -11,41 +11,52 @@ local estadoAtual = "menu"
 func drawMainMenu() do
     local textDraw = [
         stringTools.repeat("=", 20),
-        "Banco Tayio",
+        "\n",
+        "Banco Tayio\n",
         stringTools.repeat("=", 20),
         "\n",
-        "[1] - Entrar",
-        "[2] - Criar conta",
-        "[3] - Listar contas",
-        "[4] - Sair",
+        "[1] - Entrar\n",
+        "[2] - Criar conta\n",
+        "[3] - Listar contas\n",
+        "[4] - Sair\n",
+        "\n",
     ]
 
-
-    for (str in textDraw) do
-        io.print(str, "\n")
+    for (str : textDraw) do
+        io.print(str)
     end
 end
 
 func main() do
-    while(ativo and estadoAtual == "menu") do
-        drawMainMenu()
-        io.print("Opcao: ")
-        local inpt = io.readln()
-        if (inpt == "1") do
-            estadoAtual = "login"
-        elseif (inpt == "2") do
-        elseif (inpt == "3") do
-        elseif (inpt == "4") do
-            io.println("Obrigado por usar o banco Taiyo")
-            ativo = false
+    while(ativo) do
+        if (estadoAtual == "menu") do
+            drawMainMenu()
+            io.print("Opcao: ")
+            local inpt = io.readln()
+            if (inpt == "1") do
+                estadoAtual = "login"
+            elseif (inpt == "2") do
+                estadoAtual = "create"
+            elseif (inpt == "3") do
+                AccountController.listAccounts()
+            elseif (inpt == "4") do
+                io.println("Obrigado por usar o banco Taiyo")
+                ativo = false
+            end
+        elseif (estadoAtual == "login") do
+            io.println("Por favor digite seu usuario (ou digite 'cancelar' para voltar ao menu principal): ")
+            io.print("|> ")
+            local username = io.readln()
+
+            if (username == "cancelar") do
+                estadoAtual = "menu"
+            elseif (not AccountController.findAccount(username)) do
+                io.println("Usuario nao encontrado")
+            end
         end
     end
 
     while(ativo and estadoAtual == "login") do
-        io.println("Por favor digite seu usuario")
-        io.print("|> ")
-        local inpt = io.readln()
-
 
     end
 end

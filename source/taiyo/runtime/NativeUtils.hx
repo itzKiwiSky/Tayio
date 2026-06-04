@@ -111,4 +111,25 @@ class NativeUtils
         var r = toValueArray(v);
         return r != null ? Ok(ArrayVal(r)) : Err(new LangError(null, null, RuntimeError, '$fn() expects an array'));
     }
+    
+    public static function dumpDict(d:Map<String, Value>, indent:Int = 0):String
+    {
+        var pad = StringTools.lpad("", " ", indent * 2);
+        var lines = ['$pad{'];
+        for (k => v in d)
+        {
+            switch (v)
+            {
+                case DictVal(inner):
+                    lines.push('$pad  $k:');
+                    lines.push(dumpDict(inner, indent + 1));
+                case FuncVal(_) | NativeFuncVal(_):
+                    lines.push('$pad  $k: <function>');
+                case _:
+                    lines.push('$pad  $k: ${valueToString(v)}');
+            }
+        }
+        lines.push('$pad}');
+        return lines.join("\n");
+    }
 }

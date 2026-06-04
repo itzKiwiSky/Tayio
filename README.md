@@ -70,4 +70,21 @@ func runFunc(fn) do
 end
 ```
 
+## Available packages
+
+Taiyo come with a lot of builtin packages and functions, thoses modules can be disable on the runtime configuration class, by default every module is active
+
+```
+[.] taiyo
+    [.] std
+        [.] io
+        [.] stringTools
+        [.] arrayTools
+        [.] dictTools
+        [.] math
+        [.] crypto
+            [.] hash
+
+```
+
 Contributions are open

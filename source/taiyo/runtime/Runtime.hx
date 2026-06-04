@@ -1,5 +1,6 @@
 package taiyo.runtime;
 
+import haxe.Json;
 import taiyo.runtime.INativePackage.INativeModule;
 import taiyo.runtime.packages.std.Stdlib.StdLib;
 import taiyo.parser.Parser;
@@ -148,30 +149,50 @@ class Runtime
     
     function resolveNativeModule(moduleName:String):Null<Map<String, Value>>
     {
+        // direct access
         if (_nativeModules.exists(moduleName))
             return _nativeModules.get(moduleName);
             
         var parts = moduleName.split(".");
-        var field = parts.pop();
-        var parent = parts.join(".");
         
-        if (_nativeModules.exists(parent))
+        // find the longest prefix as key
+        for (i in 1...parts.length)
         {
-            var pDict = _nativeModules.get(parent);
-            var v = pDict.get(field);
-            if (v != null)
+            var prefix = parts.slice(0, i).join(".");
+            if (!_nativeModules.exists(prefix))
+                continue;
+                
+            // navigate on da segments
+            var current:Map<String, Value> = _nativeModules.get(prefix);
+            var remaining = parts.slice(i);
+            var found = true;
+            
+            for (segment in remaining)
+            {
+                var v = current.get(segment);
+                if (v == null)
+                {
+                    found = false;
+                    break;
+                }
                 switch (v)
                 {
                     case DictVal(d):
-                        return d;
+                        current = d;
                     case _:
+                        found = false;
+                        break;
                 }
+            }
+            
+            if (found)
+                return current;
         }
         
         return null;
     }
     
-    // injeta módulo no callEnv conforme UsesDecl
+    // inject on callenv
     function injectUses(uses:UsesDecl, callEnv:Environment):Void
     {
         var moduleDict = resolveNativeModule(uses.module);
@@ -230,6 +251,13 @@ class Runtime
         addNativeModule(new StdLib());
     }
     
+    public inline function dumpNativeModules():Void
+        for (k => v in _nativeModules)
+        {
+            Sys.print('[$k]');
+            Sys.print(NativeUtils.dumpDict(v));
+        }
+        
     public function run(ast:Node):RuntimeResult
     {
         globalEnv = new Environment();
@@ -527,33 +555,15 @@ class Runtime
                 return Signal(SContinue);
                 
             case UseNode(module):
-                // 1. nativo direto
-                if (_nativeModules.exists(module))
+                var resolved = resolveNativeModule(module);
+                if (resolved != null)
                 {
                     var alias = module.split(".").pop();
-                    // só cria o alias como DictVal, sem injetar flat
-                    globalEnv.createVar(alias, DictVal(_nativeModules.get(module)));
+                    env.createVar(alias, DictVal(resolved));
                     return Ok(NullVal);
                 }
                 
-                // 2. navega pelo pai (taiyo.std.io → taiyo.std["io"])
-                var parts = module.split(".");
-                var fieldName = parts[parts.length - 1];
-                var parent = parts.slice(0, parts.length - 1).join(".");
-                
-                if (parent != "" && _nativeModules.exists(parent))
-                {
-                    var pDict = _nativeModules.get(parent);
-                    var field = pDict.get(fieldName);
-                    if (field != null)
-                    {
-                        // só cria o alias, sem injetar flat
-                        globalEnv.createVar(fieldName, field);
-                        return Ok(NullVal);
-                    }
-                }
-                
-                // 3. script
+                // script
                 var path = resolveModulePath(module);
                 if (path == null)
                     return Err(new LangError(null, null, RuntimeError, 'Module "$module" not found'));
@@ -584,24 +594,7 @@ class Runtime
                     if (v != null)
                         moduleDict.set(name, v);
                 }
-                globalEnv.createVar(module.split(".").pop(), DictVal(moduleDict));
-                return Ok(NullVal);
-                
-            case ModuleNode(_):
-                return Ok(NullVal);
-                
-            case ExportNode(node):
-                switch (evaluate(node, env))
-                {
-                    case Ok(_):
-                    case other: return other;
-                }
-                switch (node)
-                {
-                    case FuncDeclNode(name, _, _, _): env.markExport(name);
-                    case VarDeclNode(_, name, _): env.markExport(name);
-                    case _:
-                }
+                env.createVar(module.split(".").pop(), DictVal(moduleDict));
                 return Ok(NullVal);
                 
             case _:

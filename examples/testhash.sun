@@ -1,0 +1,11 @@
+use taiyo.std.crypto.hash
+use taiyo.std.io
+
+func main() do
+    io.println(hash.sha256("hello"))
+    io.println(hash.sha224("hello"))
+    io.println(hash.sha1("hello"))
+    io.println(hash.md5("hello"))
+    io.println(hash.encodeBase64("hello"))
+    io.println(hash.decodeBase64("aGVsbG8="))
+end

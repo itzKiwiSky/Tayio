@@ -39,6 +39,7 @@ class Main
             }
             machine.setFilename(path);
             machine.setIn(path);
+            
             var source:String = sys.io.File.getContent(path);
             machine.run(source);
         }
