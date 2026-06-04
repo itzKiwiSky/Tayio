@@ -597,6 +597,23 @@ class Runtime
                 env.createVar(module.split(".").pop(), DictVal(moduleDict));
                 return Ok(NullVal);
                 
+            case ModuleNode(_):
+                return Ok(NullVal);
+                
+            case ExportNode(node):
+                switch (evaluate(node, env))
+                {
+                    case Ok(_):
+                    case other: return other;
+                }
+                switch (node)
+                {
+                    case FuncDeclNode(name, _, _, _): env.markExport(name);
+                    case VarDeclNode(_, name, _): env.markExport(name);
+                    case _:
+                }
+                return Ok(NullVal);
+                
             case _:
                 return Err(new LangError(null, null, RuntimeError, 'Unknown node: $node'));
         }

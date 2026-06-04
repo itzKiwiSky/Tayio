@@ -1,5 +1,6 @@
 use taiyo.std.arrayTools
 use taiyo.std.io
+use taiyo.std.crypto.hash
 
 module AccountController
 
@@ -8,7 +9,7 @@ local accounts = []
 export func newAccount(username, pwd) do
     local account = {
         username = username,
-        password = pwd,
+        password = hash.sha256(pwd),
         transactions = {},
         balance = 0,
     }

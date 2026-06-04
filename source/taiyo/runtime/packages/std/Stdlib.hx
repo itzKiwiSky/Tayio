@@ -15,6 +15,7 @@ class StdLib extends NativeNamespace
         add("io", new Stdio());
         add("stringTools", new TaiyoStringTools());
         add("arrayTools", new TaiyoArrayTools());
+        add("ansi", new TaiyoAnsi());
         
         /* namespace crypto */
         add("crypto", new StdCrypto());

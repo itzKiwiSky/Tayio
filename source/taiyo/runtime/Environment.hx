@@ -19,6 +19,11 @@ class Environment
             exports.push(name);
     }
     
+    public function clear():Void
+    {
+        variables.clear();
+    }
+    
     public function getVar(name:String):Null<Value>
     {
         if (variables.exists(name))

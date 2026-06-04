@@ -2,7 +2,6 @@
 use taiyo.std.stringTools
 use taiyo.std.arrayTools
 use taiyo.std.io
-use Account
 use AccountController
 
 local ativo = true
@@ -53,10 +52,32 @@ func main() do
             elseif (not AccountController.findAccount(username)) do
                 io.println("Usuario nao encontrado")
             end
+        elseif (estadoAtual == "create") do
+            local username = ""
+            local pwd = ""
+            io.println("Por favor digite seu usuario (ou digite 'cancelar' para voltar ao menu principal): ")
+            io.print("|> ")
+
+            username = io.readln()
+
+            if (username == "cancelar") do
+                estadoAtual = "menu"
+                username = ""
+                pwd = ""
+            end
+
+            io.println("Por favor digite sua senha (ou digite 'cancelar' para voltar ao menu principal): ")
+            io.print("|> ")
+
+            pwd = io.readln()
+
+            if (username == "cancelar") do
+                estadoAtual = "menu"
+                username = ""
+                pwd = ""
+            end
+
+            AccountController.newAccount(username, pwd)
         end
-    end
-
-    while(ativo and estadoAtual == "login") do
-
     end
 end
