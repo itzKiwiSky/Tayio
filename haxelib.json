@@ -8,7 +8,7 @@
     ],
     "description": "Taiyo - A simple interpreted scripting language",
     "version": "0.0.1",
-    "classPath": "src/",
+    "classPath": "source/",
     "releasenote": "First version released",
     "contributors": [
         "Cloudyxlt"
