@@ -1,0 +1,18 @@
+{
+    "name": "taiyo",
+    "url": "https://github.com/itzKiwiSky/Taiyo",
+    "license": "MIT",
+    "tags": [
+        "scripting",
+        "interpreter"
+    ],
+    "description": "Taiyo - A simple interpreted scripting language",
+    "version": "0.0.1",
+    "classPath": "src/",
+    "releasenote": "First version released",
+    "contributors": [
+        "Cloudyxlt"
+    ],
+    "dependencies": {},
+    "main": "taiyo.Main"
+}

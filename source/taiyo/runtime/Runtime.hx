@@ -114,6 +114,9 @@ class Runtime
             globalEnv.createVar(name, value);
     }
     
+    public inline function registerModule(name:String, mod:Map<String, Value>):Void
+        _nativeModules.set(name, mod);
+        
     // sugars
     public inline function setInt(name:String, v:Int):Void
         set(name, IntVal(v));
@@ -271,7 +274,7 @@ class Runtime
             case _:
         }
         
-        // main é opcional — se existir chama, senão retorna Ok
+        // main is opcional
         var mainFunc = globalEnv.getVar("main");
         if (mainFunc == null)
             return Ok(NullVal);
