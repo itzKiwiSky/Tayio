@@ -1,5 +1,6 @@
 package taiyo.runtime.packages.std;
 
+import taiyo.runtime.packages.std.TayioDictTools.TaiyoDictTools;
 import taiyo.runtime.packages.std.Stdio;
 import taiyo.runtime.packages.std.Mathlib;
 import taiyo.runtime.packages.std.TaiyoStringTools;
@@ -15,6 +16,7 @@ class StdLib extends NativeNamespace
         add("io", new Stdio());
         add("stringTools", new TaiyoStringTools());
         add("arrayTools", new TaiyoArrayTools());
+        add("dictTools", new TaiyoDictTools());
         add("ansi", new TaiyoAnsi());
         
         /* namespace crypto */

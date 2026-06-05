@@ -1,0 +1,7 @@
+use taiyo.std.io
+use taiyo.std.stringTools
+
+
+func main() do
+    io.println(stringTools.align("HelloWorld", 30, " ", "center"))
+end
