@@ -29,19 +29,28 @@ class Runtime
 {
     public var currentFile:String = "";
     
+    var _disabledModules:Array<String> = [];
     var globalEnv:Environment;
     var _nativeModules:Map<String, Map<String, Value>>;
     
+    public var autoInitialization:Bool = true;
+    
+    var _initialized:Bool = false;
+    
     public function new()
     {
+        this._disabledModules = [];
         this.currentFile = "";
         this.globalEnv = new Environment();
-        this._nativeModules = new Map<String, Map<String, Value>>();
+        this._nativeModules = [];
     }
     
     public inline function addNativeModule(mod:INativeModule):Void
-        _nativeModules.set(mod.modname, mod.getModule());
-        
+    {
+        if (!_disabledModules.contains(mod.modname))
+            _nativeModules.set(mod.modname, mod.getModule());
+    }
+    
     public inline function get(name:String):Null<Value>
         return globalEnv.getVar(name);
         
@@ -150,6 +159,12 @@ class Runtime
         }
     }
     
+    public inline function disableModule(name:String):Void
+        _disabledModules.push(name);
+        
+    public inline function enableModule(name:String):Void
+        _disabledModules.remove(name);
+        
     function resolveNativeModule(moduleName:String):Null<Map<String, Value>>
     {
         // direct access
@@ -249,9 +264,13 @@ class Runtime
     
     public function init()
     {
-        globalEnv = new Environment();
+        if (globalEnv == null)
+            globalEnv = new Environment();
+            
         _nativeModules = [];
         addNativeModule(new StdLib());
+        
+        _initialized = true;
     }
     
     public inline function dumpNativeModules():Void
@@ -263,10 +282,9 @@ class Runtime
         
     public function run(ast:Node):RuntimeResult
     {
-        globalEnv = new Environment();
-        _nativeModules = [];
-        addNativeModule(new StdLib());
-        
+        if (!_initialized)
+            init();
+            
         switch (evaluate(ast, globalEnv))
         {
             case Err(e):

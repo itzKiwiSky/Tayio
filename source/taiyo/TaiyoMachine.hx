@@ -14,7 +14,6 @@ class TaiyoMachine
     public function new()
     {
         this.isDebug = false;
-        this.autoInitRuntime = true;
         runtime = new Runtime();
     }
     
@@ -30,9 +29,8 @@ class TaiyoMachine
     public function run(code:String)
     {
         // static runtime initialization //
-        if (autoInitRuntime)
-            runtime.init();
-            
+        runtime.autoInitialization = autoInitRuntime;
+        
         if (isDebug)
             runtime.dumpNativeModules();
             
